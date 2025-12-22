@@ -1,0 +1,437 @@
+// ===================================
+// Navigation & Mobile Menu
+// ===================================
+const navbar = document.getElementById('navbar');
+const hamburger = document.getElementById('hamburger');
+const navMenu = document.getElementById('navMenu');
+const navLinks = document.querySelectorAll('.nav-link');
+
+// Handle scroll event for navbar
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+    } else {
+        navbar.classList.remove('scrolled');
+    }
+});
+
+// Toggle mobile menu
+hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navMenu.classList.toggle('active');
+});
+
+// Close mobile menu when clicking on a nav link
+navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    });
+});
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    }
+});
+
+// ===================================
+// Smooth Scrolling
+// ===================================
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        
+        if (target) {
+            const offsetTop = target.offsetTop - 70;
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+
+// ===================================
+// Active Nav Link on Scroll
+// ===================================
+const sections = document.querySelectorAll('section[id]');
+
+function updateActiveNavLink() {
+    const scrollY = window.pageYOffset;
+    
+    sections.forEach(section => {
+        const sectionHeight = section.offsetHeight;
+        const sectionTop = section.offsetTop - 100;
+        const sectionId = section.getAttribute('id');
+        
+        if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${sectionId}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
+}
+
+window.addEventListener('scroll', updateActiveNavLink);
+
+// ===================================
+// Skills Progress Bar Animation
+// ===================================
+const skillsSection = document.querySelector('.skills');
+let skillsAnimated = false;
+
+function animateSkills() {
+    const progressBars = document.querySelectorAll('.progress');
+    
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 100);
+    });
+}
+
+function checkSkillsInView() {
+    if (!skillsAnimated && skillsSection) {
+        const rect = skillsSection.getBoundingClientRect();
+        const isInView = rect.top < window.innerHeight && rect.bottom >= 0;
+        
+        if (isInView) {
+            animateSkills();
+            skillsAnimated = true;
+        }
+    }
+}
+
+window.addEventListener('scroll', checkSkillsInView);
+window.addEventListener('load', checkSkillsInView);
+
+// ===================================
+// Contact Form Handling
+// ===================================
+const contactForm = document.getElementById('contactForm');
+const formMessage = document.getElementById('formMessage');
+
+contactForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const message = document.getElementById('message').value;
+    
+    // Basic validation
+    if (name.trim() === '' || email.trim() === '' || message.trim() === '') {
+        showMessage('Please fill in all fields.', 'error');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showMessage('Please enter a valid email address.', 'error');
+        return;
+    }
+    
+    // Simulate form submission (In production, this would send to a backend)
+    setTimeout(() => {
+        showMessage('Message sent successfully! I will get back to you soon.', 'success');
+        contactForm.reset();
+    }, 500);
+});
+
+function showMessage(message, type) {
+    formMessage.textContent = message;
+    formMessage.className = `form-message ${type}`;
+    
+    // Auto-hide message after 5 seconds
+    setTimeout(() => {
+        formMessage.className = 'form-message';
+    }, 5000);
+}
+
+// ===================================
+// Scroll to Top Button
+// ===================================
+const scrollTopBtn = document.getElementById('scrollTop');
+
+scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});
+
+// Show/hide scroll to top button
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 500) {
+        scrollTopBtn.style.opacity = '1';
+        scrollTopBtn.style.pointerEvents = 'auto';
+    } else {
+        scrollTopBtn.style.opacity = '0';
+        scrollTopBtn.style.pointerEvents = 'none';
+    }
+});
+
+// Initialize scroll top button visibility
+scrollTopBtn.style.transition = 'opacity 0.3s ease';
+scrollTopBtn.style.opacity = '0';
+scrollTopBtn.style.pointerEvents = 'none';
+
+// ===================================
+// Intersection Observer for Animations
+// ===================================
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -100px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+            observer.unobserve(entry.target);
+        }
+    });
+}, observerOptions);
+
+// Observe elements for animation
+const animateElements = document.querySelectorAll('.project-card, .timeline-item, .skill-category, .info-card');
+animateElements.forEach(el => {
+    el.style.opacity = '0';
+    observer.observe(el);
+});
+
+// ===================================
+// Set Current Year in Footer
+// ===================================
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+// ===================================
+// Typing Effect for Hero Section (Optional Enhancement)
+// ===================================
+const heroTitle = document.querySelector('.hero-title');
+const originalText = heroTitle.textContent;
+let typingIndex = 0;
+let typingInterval;
+
+function typeEffect() {
+    if (typingIndex < originalText.length) {
+        heroTitle.textContent = originalText.substring(0, typingIndex + 1);
+        typingIndex++;
+    } else {
+        clearInterval(typingInterval);
+    }
+}
+
+// Uncomment below to enable typing effect
+// window.addEventListener('load', () => {
+//     heroTitle.textContent = '';
+//     typingIndex = 0;
+//     typingInterval = setInterval(typeEffect, 100);
+// });
+
+// ===================================
+// Project Card Tilt Effect (Optional Enhancement)
+// ===================================
+const projectCards = document.querySelectorAll('.project-card');
+
+projectCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = (y - centerY) / 10;
+        const rotateY = (centerX - x) / 10;
+        
+        // Uncomment below for tilt effect
+        // card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    });
+    
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    });
+});
+
+// ===================================
+// Form Input Focus Effects
+// ===================================
+const formInputs = document.querySelectorAll('.form-group input, .form-group textarea');
+
+formInputs.forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+    });
+    
+    input.addEventListener('blur', function() {
+        if (this.value === '') {
+            this.parentElement.classList.remove('focused');
+        }
+    });
+});
+
+// ===================================
+// Prevent Default Form Submission on Enter (except textarea)
+// ===================================
+document.querySelectorAll('.form-group input').forEach(input => {
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+        }
+    });
+});
+
+// ===================================
+// Loading Animation (Optional)
+// ===================================
+window.addEventListener('load', () => {
+    document.body.style.opacity = '0';
+    setTimeout(() => {
+        document.body.style.transition = 'opacity 0.5s ease';
+        document.body.style.opacity = '1';
+    }, 100);
+});
+
+// ===================================
+// Parallax Scroll Effect for Hero (Optional Enhancement)
+// ===================================
+window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const heroContent = document.querySelector('.hero-content');
+    
+    if (heroContent && scrolled < window.innerHeight) {
+        // Uncomment for parallax effect
+        // heroContent.style.transform = `translateY(${scrolled * 0.5}px)`;
+        // heroContent.style.opacity = 1 - (scrolled / window.innerHeight);
+    }
+});
+
+// ===================================
+// Console Message (Optional)
+// ===================================
+console.log('%c👋 Hello! Thanks for checking out my portfolio!', 'color: #2563eb; font-size: 20px; font-weight: bold;');
+console.log('%cInterested in the code? Feel free to reach out!', 'color: #6b7280; font-size: 14px;');
+
+// ===================================
+// Add Active State to Current Section
+// ===================================
+const addActiveClass = () => {
+    let currentSection = '';
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        
+        if (window.pageYOffset >= sectionTop - 150) {
+            currentSection = section.getAttribute('id');
+        }
+    });
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('active');
+        }
+    });
+};
+
+window.addEventListener('scroll', addActiveClass);
+
+// ===================================
+// Disable Right Click on Images (Optional - for portfolio protection)
+// ===================================
+// Uncomment if you want to disable right-click on images
+// document.querySelectorAll('img').forEach(img => {
+//     img.addEventListener('contextmenu', (e) => {
+//         e.preventDefault();
+//     });
+// });
+
+// ===================================
+// Initialize AOS (Animate On Scroll) if library is included
+// ===================================
+// If you include AOS library, uncomment:
+// AOS.init({
+//     duration: 800,
+//     offset: 100,
+//     once: true
+// });
+
+// ===================================
+// Print message when all resources are loaded
+// ===================================
+window.addEventListener('load', () => {
+    console.log('Portfolio loaded successfully! 🚀');
+});
+
+// ===================================
+// Easter Egg - Konami Code (Optional Fun Feature)
+// ===================================
+let konamiCode = [];
+const konamiPattern = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
+document.addEventListener('keydown', (e) => {
+    konamiCode.push(e.key);
+    konamiCode.splice(-konamiPattern.length - 1, konamiCode.length - konamiPattern.length);
+    
+    if (konamiCode.join('') === konamiPattern.join('')) {
+        // Easter egg activated!
+        document.body.style.animation = 'rainbow 2s infinite';
+        setTimeout(() => {
+            document.body.style.animation = '';
+        }, 5000);
+    }
+});
+
+// ===================================
+// Cursor Trail Effect (Optional)
+// ===================================
+// Uncomment for cursor trail effect
+// const coords = { x: 0, y: 0 };
+// const circles = document.querySelectorAll(".circle");
+
+// circles.forEach(function (circle) {
+//     circle.x = 0;
+//     circle.y = 0;
+// });
+
+// window.addEventListener("mousemove", function(e){
+//     coords.x = e.clientX;
+//     coords.y = e.clientY;
+// });
+
+// function animateCircles() {
+//     let x = coords.x;
+//     let y = coords.y;
+    
+//     circles.forEach(function (circle, index) {
+//         circle.style.left = x - 12 + "px";
+//         circle.style.top = y - 12 + "px";
+        
+//         circle.style.scale = (circles.length - index) / circles.length;
+        
+//         circle.x = x;
+//         circle.y = y;
+
+//         const nextCircle = circles[index + 1] || circles[0];
+//         x += (nextCircle.x - x) * 0.3;
+//         y += (nextCircle.y - y) * 0.3;
+//     });
+    
+//     requestAnimationFrame(animateCircles);
+// }
+
+// animateCircles();
