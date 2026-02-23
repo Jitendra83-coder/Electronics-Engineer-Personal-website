@@ -294,6 +294,7 @@ ul {
     color: var(--text-gray);
     box-shadow: var(--shadow-md);
     transition: var(--transition);
+    position: relative;
 }
 
 .social-links a:hover {
@@ -302,17 +303,43 @@ ul {
     transform: translateY(-3px) rotate(5deg);
 }
 
-.scroll-indicator {
+.social-links a::after {
+    content: attr(aria-label);
     position: absolute;
-    bottom: 2rem;
+    top: 120%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(-10px);
+    background-color: var(--text-dark);
+    color: var(--bg-white);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+}
+
+.social-links a:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0) rotate(-5deg);
+}
+
+.scroll-indicator {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
     animation: fadeIn 2s ease;
 }
 
 .scroll-mouse {
     width: 24px;
-    height: 40px;
+    height: 60px;
     border: 2px solid var(--primary-color);
     border-radius: 20px;
     display: flex;
@@ -322,7 +349,7 @@ ul {
 
 .scroll-wheel {
     width: 4px;
-    height: 8px;
+    height: 10px;
     background-color: var(--primary-color);
     border-radius: 2px;
     animation: scroll 1.5s infinite;
