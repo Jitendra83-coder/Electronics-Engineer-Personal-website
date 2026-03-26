@@ -303,9 +303,11 @@
                     </div>
 
                     <!-- Add Form for Projects (Hidden by default) -->
-                    <div id="project-form-container" style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+                    <div id="project-form-container"
+                        style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
                         <h4 style="margin-bottom: 15px;" id="project-form-title">Add New Project</h4>
-                        <form class="admin-form" style="padding: 0; box-shadow: none; background: transparent; max-width: 100%;">
+                        <form class="admin-form"
+                            style="padding: 0; box-shadow: none; background: transparent; max-width: 100%;">
                             <input type="hidden" id="project-item-index" value="-1">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                                 <div class="form-group">
@@ -314,7 +316,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Category Icon (e.g. fas fa-network-wired)</label>
-                                    <input type="text" id="project-icon-input" placeholder="e.g. fas fa-network-wired" value="fas fa-network-wired">
+                                    <input type="text" id="project-icon-input" placeholder="e.g. fas fa-network-wired"
+                                        value="fas fa-network-wired">
                                 </div>
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
@@ -323,7 +326,8 @@
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Description</label>
-                                <textarea id="project-description-input" rows="3" placeholder="Describe your project..."></textarea>
+                                <textarea id="project-description-input" rows="3"
+                                    placeholder="Describe your project..."></textarea>
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Image URL</label>
@@ -345,7 +349,8 @@
                             </div>
                             <div style="display: flex; gap: 10px;">
                                 <button type="button" id="btn-save-project-item" class="btn-save">Save Project</button>
-                                <button type="button" id="btn-cancel-project-item" class="btn-logout" style="width: auto; padding: 12px 25px;">Cancel</button>
+                                <button type="button" id="btn-cancel-project-item" class="btn-logout"
+                                    style="width: auto; padding: 12px 25px;">Cancel</button>
                             </div>
                         </form>
                     </div>
@@ -362,9 +367,11 @@
                     </div>
 
                     <!-- Add Form for Experience (Hidden by default) -->
-                    <div id="experience-form-container" style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+                    <div id="experience-form-container"
+                        style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
                         <h4 style="margin-bottom: 15px;" id="experience-form-title">Add New Experience</h4>
-                        <form class="admin-form" style="padding: 0; box-shadow: none; background: transparent; max-width: 100%;">
+                        <form class="admin-form"
+                            style="padding: 0; box-shadow: none; background: transparent; max-width: 100%;">
                             <input type="hidden" id="experience-item-index" value="-1">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                                 <div class="form-group">
@@ -373,7 +380,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Icon (e.g. fas fa-briefcase)</label>
-                                    <input type="text" id="experience-icon-input" placeholder="e.g. fas fa-briefcase" value="fas fa-briefcase">
+                                    <input type="text" id="experience-icon-input" placeholder="e.g. fas fa-briefcase"
+                                        value="fas fa-briefcase">
                                 </div>
                             </div>
                             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
@@ -383,43 +391,50 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Duration (Dates)</label>
-                                    <input type="text" id="experience-duration-input" placeholder="e.g. June 2023 - Aug 2023">
+                                    <input type="text" id="experience-duration-input"
+                                        placeholder="e.g. June 2023 - Aug 2023">
                                 </div>
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Company / Organization</label>
-                                <input type="text" id="experience-company-input" placeholder="e.g. Tech Solutions Pvt. Ltd.">
+                                <input type="text" id="experience-company-input"
+                                    placeholder="e.g. Tech Solutions Pvt. Ltd.">
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Description</label>
-                                <textarea id="experience-description-input" rows="3" placeholder="Describe your responsibilities..."></textarea>
+                                <textarea id="experience-description-input" rows="3"
+                                    placeholder="Describe your responsibilities..."></textarea>
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Key Skills / Tags (Comma-separated)</label>
                                 <input type="text" id="experience-tags-input" placeholder="PCB Design, IoT, Testing">
                             </div>
                             <div style="display: flex; gap: 10px;">
-                                <button type="button" id="btn-save-experience-item" class="btn-save">Save Experience</button>
-                                <button type="button" id="btn-cancel-experience-item" class="btn-logout" style="width: auto; padding: 12px 25px;">Cancel</button>
+                                <button type="button" id="btn-save-experience-item" class="btn-save">Save
+                                    Experience</button>
+                                <button type="button" id="btn-cancel-experience-item" class="btn-logout"
+                                    style="width: auto; padding: 12px 25px;">Cancel</button>
                             </div>
                         </form>
                     </div>
 
                     <div class="list-container" id="experience-list">
                         <!-- Experience items will be loaded here dynamically -->
+                    </div>
                 </div>
-            </div>
 
-            <!-- Certificates Tab -->
+                <!-- Certificates Tab -->
                 <div id="tab-certificates" class="tab-pane">
                     <div class="tab-header">
                         <h3>Manage Certificates</h3>
                     </div>
 
                     <!-- Add Form for Certificates (Hidden by default) -->
-                    <div id="certificate-form-container" style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+                    <div id="certificate-form-container"
+                        style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
                         <h4 style="margin-bottom: 15px;" id="certificate-form-title">Add New Certificate</h4>
-                        <form class="admin-form" style="padding: 0; box-shadow: none; background: transparent; max-width: 100%;">
+                        <form class="admin-form"
+                            style="padding: 0; box-shadow: none; background: transparent; max-width: 100%;">
                             <input type="hidden" id="certificate-item-index" value="-1">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                                 <div class="form-group">
@@ -428,12 +443,14 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Icon (e.g. fas fa-award)</label>
-                                    <input type="text" id="certificate-icon-input" placeholder="e.g. fas fa-award" value="fas fa-award">
+                                    <input type="text" id="certificate-icon-input" placeholder="e.g. fas fa-award"
+                                        value="fas fa-award">
                                 </div>
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Certificate Name</label>
-                                <input type="text" id="certificate-name-input" placeholder="e.g. Python for Data Science">
+                                <input type="text" id="certificate-name-input"
+                                    placeholder="e.g. Python for Data Science">
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Year</label>
@@ -441,15 +458,19 @@
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Description</label>
-                                <textarea id="certificate-description-input" rows="3" placeholder="Describe the certificate / course..."></textarea>
+                                <textarea id="certificate-description-input" rows="3"
+                                    placeholder="Describe the certificate / course..."></textarea>
                             </div>
                             <div class="form-group" style="margin-bottom: 15px;">
                                 <label>Key Skills / Tags (Comma-separated)</label>
-                                <input type="text" id="certificate-tags-input" placeholder="Python, Data Science, Analysis">
+                                <input type="text" id="certificate-tags-input"
+                                    placeholder="Python, Data Science, Analysis">
                             </div>
                             <div style="display: flex; gap: 10px;">
-                                <button type="button" id="btn-save-certificate-item" class="btn-save">Save Certificate</button>
-                                <button type="button" id="btn-cancel-certificate-item" class="btn-logout" style="width: auto; padding: 12px 25px;">Cancel</button>
+                                <button type="button" id="btn-save-certificate-item" class="btn-save">Save
+                                    Certificate</button>
+                                <button type="button" id="btn-cancel-certificate-item" class="btn-logout"
+                                    style="width: auto; padding: 12px 25px;">Cancel</button>
                             </div>
                         </form>
                     </div>
