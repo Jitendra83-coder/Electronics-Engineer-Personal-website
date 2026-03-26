@@ -435,3 +435,352 @@ document.addEventListener('keydown', (e) => {
 // }
 
 // animateCircles();
+
+// ===================================
+// Load Dynamic Content from Admin Panel (LocalStorage)
+// ===================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Hero Section
+    const savedHeroName = localStorage.getItem('heroName');
+    const savedHeroTitle = localStorage.getItem('heroTitle');
+    const savedHeroTagline = localStorage.getItem('heroTagline');
+
+    if (savedHeroName) {
+        const heroNameElement = document.querySelector('.hero-name');
+        if (heroNameElement) heroNameElement.textContent = savedHeroName;
+    }
+    
+    if (savedHeroTitle) {
+        const heroTitleElement = document.querySelector('.hero-title');
+        // If typing effect is enabled, it overrides the text content, so we just update the text content.
+        if (heroTitleElement) heroTitleElement.textContent = savedHeroTitle;
+    }
+    
+    if (savedHeroTagline) {
+        const heroTaglineElement = document.querySelector('.hero-tagline');
+        if (heroTaglineElement) heroTaglineElement.textContent = savedHeroTagline;
+    }
+
+    // About Section
+    const savedAboutParagraphs = localStorage.getItem('aboutParagraphs');
+    if (savedAboutParagraphs) {
+        try {
+            const paragraphs = JSON.parse(savedAboutParagraphs);
+            const aboutTextDiv = document.querySelector('.about-text');
+            if (aboutTextDiv && paragraphs.length > 0) {
+                aboutTextDiv.innerHTML = ''; // Clear default HTML
+                paragraphs.forEach(item => {
+                    // Check if it's the old format (string) or new format (object)
+                    const isLegacy = typeof item === 'string';
+                    const headingText = isLegacy ? '' : item.heading;
+                    const paragraphText = isLegacy ? item : item.text;
+                    
+                    if (headingText) {
+                        const h3 = document.createElement('h3');
+                        h3.textContent = headingText;
+                        aboutTextDiv.appendChild(h3);
+                    }
+                    
+                    if (paragraphText) {
+                        const p = document.createElement('p');
+                        p.style.whiteSpace = 'pre-wrap';
+                        p.textContent = paragraphText;
+                        aboutTextDiv.appendChild(p);
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Error parsing about paragraphs', e);
+        }
+    }
+
+    // About Objectives
+    const savedAboutObjectives = localStorage.getItem('aboutObjectives');
+    if (savedAboutObjectives) {
+        try {
+            const objectives = JSON.parse(savedAboutObjectives);
+            const aboutContentDiv = document.querySelector('.about-content');
+            
+            if (aboutContentDiv && objectives.length > 0) {
+                // Remove existing info-cards
+                const existingCards = aboutContentDiv.querySelectorAll('.info-card');
+                existingCards.forEach(card => card.remove());
+                
+                // Append new ones
+                objectives.forEach(item => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'info-card objective-card';
+                    cardDiv.style.marginTop = '20px'; // spacing between multiple cards
+                    
+                    const iconClass = item.icon || 'fas fa-bullseye';
+                    const headingText = item.heading || 'Career Objective';
+                    
+                    cardDiv.innerHTML = `
+                        <div class="card-icon">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4>${headingText}</h4>
+                            <p style="white-space: pre-wrap;">${item.text}</p>
+                        </div>
+                    `;
+                    
+                    aboutContentDiv.appendChild(cardDiv);
+                });
+            }
+        } catch (e) {
+            console.error('Error parsing about objectives', e);
+        }
+    } else {
+        const savedAboutObjective = localStorage.getItem('aboutObjective');
+        if (savedAboutObjective) {
+            const objectiveParagraph = document.querySelector('.objective-card .card-content p');
+            if (objectiveParagraph) {
+                objectiveParagraph.style.whiteSpace = 'pre-wrap';
+                objectiveParagraph.textContent = savedAboutObjective;
+            }
+        }
+    }
+
+    // Education Section
+    const savedEducationItems = localStorage.getItem('educationItems');
+    if (savedEducationItems) {
+        try {
+            const educationList = JSON.parse(savedEducationItems);
+            const educationGrid = document.querySelector('.education-grid');
+            
+            if (educationGrid && educationList.length > 0) {
+                // Clear existing
+                educationGrid.innerHTML = '';
+                
+                educationList.forEach((item) => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'education-category';
+                    
+                    // Determine icon based on level keyword
+                    let iconClass = 'fas fa-graduation-cap';
+                    const levelLower = (item.level || '').toLowerCase();
+                    if (levelLower.includes('school')) iconClass = 'fas fa-school';
+                    
+                    categoryDiv.innerHTML = `
+                        <div class="category-header">
+                            <div class="category-icon">
+                                <i class="${iconClass}"></i>
+                            </div>
+                            <h3>${item.level || 'Education'}</h3>
+                        </div>
+                        <div class="education-details">
+                            <div class="education-item">
+                                <span class="education-label">Course</span>
+                                <span class="education-value">${item.course || ''}</span>
+                            </div>
+                            <div class="education-item">
+                                <span class="education-label">Year</span>
+                                <span class="education-value">${item.year || ''}</span>
+                            </div>
+                            <div class="education-item">
+                                <span class="education-label">Percentage/CGPA</span>
+                                <span class="education-value">${item.percentage || ''}</span>
+                            </div>
+                            <div class="education-item">
+                                <span class="education-label">University/Board</span>
+                                <span class="education-value">${item.university || ''}</span>
+                            </div>
+                        </div>
+                    `;
+                    educationGrid.appendChild(categoryDiv);
+                });
+            }
+        } catch (e) {
+            console.error('Error parsing education items', e);
+        }
+    }
+
+    // --- RENDER SKILLS FROM LOCALSTORAGE ---
+    const skillsGrid = document.querySelector('.skills-grid');
+    if (skillsGrid) {
+        try {
+            const storedSkills = localStorage.getItem('skillsItems');
+            if (storedSkills) {
+                const skills = JSON.parse(storedSkills);
+                if (skills.length > 0) {
+                    skillsGrid.innerHTML = '';
+                    // Grouping skills by category
+                    const categories = {};
+                    skills.forEach(skill => {
+                        const catName = skill.category || 'General';
+                        if (!categories[catName]) {
+                            categories[catName] = {
+                                icon: skill.icon || 'fas fa-star',
+                                items: []
+                            };
+                        }
+                        categories[catName].items.push(skill);
+                    });
+
+                    Object.keys(categories).forEach(catName => {
+                        const cat = categories[catName];
+                        const catDiv = document.createElement('div');
+                        catDiv.className = `skill-category ${catName.toLowerCase().replace(/\s+/g, '-')}`;
+                        
+                        let itemsHTML = '';
+                        cat.items.forEach(item => {
+                            itemsHTML += `
+                                <div class="skill-item">
+                                    <div class="skill-info">
+                                        <span>${item.name}</span>
+                                        <span>${item.percentage}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: ${item.percentage}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        catDiv.innerHTML = `
+                            <div class="category-header">
+                                <div class="category-icon">
+                                    <i class="${cat.icon}"></i>
+                                </div>
+                                <h3>${catName}</h3>
+                            </div>
+                            <div class="skill-list">
+                                ${itemsHTML}
+                            </div>
+                        `;
+                        skillsGrid.appendChild(catDiv);
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Error rendering skills:', e);
+        }
+    }
+
+    // --- RENDER PROJECTS FROM LOCALSTORAGE ---
+    const projectsGrid = document.querySelector('.projects-grid');
+    if (projectsGrid) {
+        try {
+            const storedProjects = localStorage.getItem('projectsItems');
+            if (storedProjects) {
+                const projects = JSON.parse(storedProjects);
+                if (projects.length > 0) {
+                    projectsGrid.innerHTML = '';
+                    projects.forEach(project => {
+                        const projectCard = document.createElement('div');
+                        projectCard.className = 'project-card';
+                        
+                        const tagsHTML = (project.tags || '')
+                            .split(',')
+                            .map(tag => `<span class="tag">${tag.trim()}</span>`)
+                            .join('');
+
+                        projectCard.innerHTML = `
+                            <div class="project-image">
+                                <img src="${project.image || 'https://via.placeholder.com/600x400'}" alt="${project.title}">
+                                <div class="project-overlay"></div>
+                            </div>
+                            <div class="project-content">
+                                <h3>${project.title}</h3>
+                                <p>${project.description}</p>
+                                <div class="project-tags">
+                                    ${tagsHTML}
+                                </div>
+                                <div class="project-links">
+                                    <a href="${project.github || '#'}" target="_blank" class="btn-link">
+                                        <i class="fab fa-github"></i> Code
+                                    </a>
+                                    <a href="${project.demo || '#'}" target="_blank" class="btn-link primary">
+                                        <i class="fas fa-external-link-alt"></i> Demo
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        projectsGrid.appendChild(projectCard);
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Error rendering projects:', e);
+        }
+    }
+
+    // --- RENDER EXPERIENCE FROM LOCALSTORAGE ---
+    const timeline = document.querySelector('.timeline');
+    if (timeline) {
+        try {
+            const storedExp = localStorage.getItem('experienceItems');
+            if (storedExp) {
+                const experience = JSON.parse(storedExp);
+                if (experience.length > 0) {
+                    timeline.innerHTML = '';
+                    experience.forEach(item => {
+                        const timelineItem = document.createElement('div');
+                        timelineItem.className = 'timeline-item';
+                        
+                        const skillsTagsHTML = (item.tags || '')
+                            .split(',')
+                            .map(tag => `<span class="skill-tag">${tag.trim()}</span>`)
+                            .join('');
+
+                        timelineItem.innerHTML = `
+                            <div class="timeline-dot">
+                                <i class="${item.icon || 'fas fa-briefcase'}"></i>
+                            </div>
+                            <div class="timeline-card">
+                                <div class="card-header">
+                                    <span class="badge">${item.badge}</span>
+                                    <span class="duration">${item.duration}</span>
+                                </div>
+                                <h3>${item.title}</h3>
+                                <p class="company">${item.company} </p>
+                                <p class="description">${item.description}</p>
+                                <div class="skills-tags">
+                                    ${skillsTagsHTML}
+                                </div>
+                            </div>
+                        `;
+                        timeline.appendChild(timelineItem);
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Error rendering experience:', e);
+        }
+    }
+
+    // --- RENDER CERTIFICATIONS FROM LOCALSTORAGE ---
+    const certList = document.querySelector('.cert-list');
+    if (certList) {
+        try {
+            const storedCerts = localStorage.getItem('certificatesItems');
+            if (storedCerts) {
+                const certifications = JSON.parse(storedCerts);
+                if (certifications.length > 0) {
+                    certList.innerHTML = '';
+                    certifications.forEach(cert => {
+                        const certItem = document.createElement('div');
+                        certItem.className = 'cert-item';
+                        
+                        const tagsHTML = (cert.tags || '')
+                            .split(',')
+                            .filter(tag => tag.trim() !== '')
+                            .map(tag => `<span class="skill-tag">${tag.trim()}</span>`)
+                            .join('');
+
+                        certItem.innerHTML = `
+                            <h4>${cert.name}</h4>
+                            <p><span class="cert-issuer">${cert.issuer}</span> | <span class="cert-year">${cert.year}</span></p>
+                            ${cert.description ? `<p class="description">${cert.description}</p>` : ''}
+                            ${tagsHTML ? `<div class="skills-tags">${tagsHTML}</div>` : ''}
+                        `;
+                        certList.appendChild(certItem);
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Error rendering certifications:', e);
+        }
+    }
+});
