@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
     const menuToggle = document.getElementById('menu-toggle');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
+    
+    // Profile Dropdown Elements
+    const userProfile = document.getElementById('user-profile');
+    const profileDropdown = document.getElementById('profile-dropdown');
+    const dropdownLogout = document.getElementById('dropdown-logout');
 
     // Default Credentials
     const ADMIN_USER = 'admin';
@@ -102,6 +107,61 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.replace('fa-times', 'fa-bars');
         }
     }
+
+    // Profile Dropdown Toggle
+    if (userProfile) {
+        userProfile.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userProfile.classList.toggle('active');
+            profileDropdown.classList.toggle('active');
+        });
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+        if (userProfile && userProfile.classList.contains('active')) {
+            userProfile.classList.remove('active');
+            profileDropdown.classList.remove('active');
+        }
+    });
+
+    // Profile Dropdown Actions
+    if (dropdownLogout) {
+        dropdownLogout.addEventListener('click', (e) => {
+            e.stopPropagation();
+            localStorage.removeItem('adminLoggedIn');
+            hideDashboard();
+            // Reset dropdown state
+            userProfile.classList.remove('active');
+            profileDropdown.classList.remove('active');
+        });
+    }
+
+    // Other dropdown items
+    const dropdownItems = document.querySelectorAll('.dropdown-item:not(.logout-item)');
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const action = item.getAttribute('data-action');
+            
+            if (action === 'contact') {
+                // Switch to contact tab
+                tabLinks.forEach(l => l.classList.remove('active'));
+                tabPanes.forEach(pane => pane.classList.remove('active'));
+                
+                const targetTab = document.getElementById('tab-contact');
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                    topbarTitle.textContent = 'Contact Information';
+                }
+            } else {
+                alert(`Opening ${action} settings... (Feature coming soon)`);
+            }
+            
+            userProfile.classList.remove('active');
+            profileDropdown.classList.remove('active');
+        });
+    });
 
     // Show/Hide Dashboard Functions
     function showDashboard() {
@@ -2201,6 +2261,50 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCancelCertificateItem.addEventListener('click', (e) => {
             e.preventDefault();
             certificatesFormContainer.style.display = 'none';
+        });
+    }
+
+    // --- CONTACT SECTION SAVE ---
+    const contactForm = document.getElementById('contact-form');
+    const contactEmailInput = document.getElementById('contact-email');
+    const contactPhoneInput = document.getElementById('contact-phone');
+    const contactLocationInput = document.getElementById('contact-location');
+
+    // Load Contact Data
+    function loadContactData() {
+        if (!contactEmailInput) return;
+        contactEmailInput.value = localStorage.getItem('contactEmail') || 'jitendrasharma.ece@gmail.com';
+        contactPhoneInput.value = localStorage.getItem('contactPhone') || '+91 8318357896';
+        contactLocationInput.value = localStorage.getItem('contactLocation') || 'Lucknow, India';
+    }
+
+    loadContactData();
+
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const saveBtn = this.querySelector('.btn-save');
+            const originalText = saveBtn.innerHTML;
+
+            // Visual feedback
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveBtn.style.opacity = '0.8';
+
+            // Save to LocalStorage
+            localStorage.setItem('contactEmail', contactEmailInput.value.trim());
+            localStorage.setItem('contactPhone', contactPhoneInput.value.trim());
+            localStorage.setItem('contactLocation', contactLocationInput.value.trim());
+
+            setTimeout(() => {
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                saveBtn.style.backgroundColor = '#4cc9f0';
+                
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.style.backgroundColor = '';
+                    saveBtn.style.opacity = '1';
+                }, 2000);
+            }, 800);
         });
     }
 

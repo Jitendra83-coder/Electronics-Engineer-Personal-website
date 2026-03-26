@@ -72,9 +72,31 @@
                     </button>
                     <div class="topbar-title">Overview</div>
                 </div>
-                <div class="user-info">
-                    <span>Welcome, <strong>Admin</strong></span>
-                    <i class="fas fa-user-circle"></i>
+                <div class="user-profile" id="user-profile">
+                    <div class="user-info">
+                        <span>Welcome, <strong>Admin</strong></span>
+                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </div>
+                    <div class="dropdown-menu-profile" id="profile-dropdown">
+                        <div class="dropdown-item" data-action="profile">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Profile Update</span>
+                        </div>
+                        <div class="dropdown-item" data-action="contact">
+                            <i class="fas fa-address-book"></i>
+                            <span>Contact Update</span>
+                        </div>
+                        <div class="dropdown-item" data-action="map">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <span>Map Coordinations</span>
+                        </div>
+                        <hr>
+                        <div class="dropdown-item logout-item" id="dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -482,6 +504,55 @@
 
                     <div class="list-container" id="certificates-list">
                         <!-- Certificates items will be loaded here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Contact Update Section -->
+                <div id="tab-contact" class="tab-pane">
+                    <div class="contact-update-wrapper">
+                        <div class="contact-update-header">
+                            <div class="contact-update-icon-box">
+                                <i class="fas fa-address-book"></i>
+                            </div>
+                            <div>
+                                <h2>Contact Information</h2>
+                                <p>Update your public contact details shown on the portfolio.</p>
+                            </div>
+                        </div>
+                        <form id="contact-form" class="contact-form-card">
+                            <div class="contact-field">
+                                <div class="contact-field-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="contact-field-body">
+                                    <label for="contact-email">Email Address</label>
+                                    <input type="email" id="contact-email" placeholder="e.g. yourname@example.com">
+                                </div>
+                            </div>
+                            <div class="contact-field">
+                                <div class="contact-field-icon">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <div class="contact-field-body">
+                                    <label for="contact-phone">Phone Number</label>
+                                    <input type="tel" id="contact-phone" placeholder="e.g. +91 98765 43210">
+                                </div>
+                            </div>
+                            <div class="contact-field">
+                                <div class="contact-field-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="contact-field-body">
+                                    <label for="contact-location">Location</label>
+                                    <input type="text" id="contact-location" placeholder="e.g. Lucknow, India">
+                                </div>
+                            </div>
+                            <div class="contact-form-footer">
+                                <button type="submit" class="btn-save contact-save-btn">
+                                    <i class="fas fa-save"></i> Save Contact Info
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
