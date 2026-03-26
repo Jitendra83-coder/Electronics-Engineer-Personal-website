@@ -88,9 +88,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const heroTitle = localStorage.getItem('heroTitle');
     const heroTagline = localStorage.getItem('heroTagline');
     
-    if (heroName) document.getElementById('hero-name-input').value = heroName;
-    if (heroTitle) document.getElementById('hero-title-input').value = heroTitle;
-    if (heroTagline) document.getElementById('hero-tagline-input').value = heroTagline;
+    if (heroName) {
+        document.getElementById('hero-name-input').value = heroName;
+    } else {
+        document.getElementById('hero-name-input').value = 'Jitendra Sharma';
+    }
+    
+    if (heroTitle) {
+        document.getElementById('hero-title-input').value = heroTitle;
+    } else {
+        document.getElementById('hero-title-input').value = 'Electronics & Communication Engineer';
+    }
+    
+    if (heroTagline) {
+        document.getElementById('hero-tagline-input').value = heroTagline;
+    } else {
+        document.getElementById('hero-tagline-input').value = 'I am an Electronics and Communication Engineer with a passion for designing and developing hardware and software solutions.';
+    }
 
     // Save Hero Section
     const btnSaveHero = document.getElementById('btn-save-hero');
@@ -833,8 +847,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultSkills = [
         { category: "Electronics", icon: "fas fa-microchip", name: "Communication Systems", percentage: "85" },
         { category: "Electronics", icon: "fas fa-microchip", name: "Digital Electronics", percentage: "90" },
+        { category: "Electronics", icon: "fas fa-microchip", name: "Embedded Systems", percentage: "80" },
+        { category: "Electronics", icon: "fas fa-microchip", name: "Signal Processing", percentage: "75" },
         { category: "Programming Languages", icon: "fas fa-code", name: "C/C++", percentage: "85" },
         { category: "Programming Languages", icon: "fas fa-code", name: "Python", percentage: "80" },
+        { category: "Programming Languages", icon: "fas fa-code", name: "Embedded C", percentage: "75" },
+        { category: "Programming Languages", icon: "fas fa-code", name: "VHDL/Verilog", percentage: "70" },
         { category: "Tools & Software", icon: "fas fa-wrench", name: "MATLAB", percentage: "85" },
         { category: "Tools & Software", icon: "fas fa-wrench", name: "Proteus", percentage: "80" },
         { category: "Tools & Software", icon: "fas fa-wrench", name: "Multisim", percentage: "75" },

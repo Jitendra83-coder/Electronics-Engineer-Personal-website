@@ -15,6 +15,12 @@
             "webRoot": "${workspaceFolder}"
         },
         {
+            "name": "Launch Admin Panel",
+            "request": "launch",
+            "type": "chrome",
+            "file": "${workspaceFolder}/Admin pannel/admin.html"
+        },
+        {
             "type": "pwa-msedge",
             "name": "Launch Microsoft Edge",
             "request": "launch",
