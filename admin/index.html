@@ -66,7 +66,12 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="topbar">
-                <div class="topbar-title">Overview</div>
+                <div class="topbar-left">
+                    <button id="menu-toggle" class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="topbar-title">Overview</div>
+                </div>
                 <div class="user-info">
                     <span>Welcome, <strong>Admin</strong></span>
                     <i class="fas fa-user-circle"></i>
@@ -482,6 +487,8 @@
 
             </div>
         </main>
+        <!-- Overlay for mobile sidebar -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
     </div>
 
     <script src="admin.js"></script>

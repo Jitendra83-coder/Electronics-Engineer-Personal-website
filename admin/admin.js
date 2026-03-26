@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabLinks = document.querySelectorAll('.sidebar-menu li');
     const tabPanes = document.querySelectorAll('.tab-pane');
     const topbarTitle = document.querySelector('.topbar-title');
+    const sidebar = document.querySelector('.sidebar');
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
 
     // Default Credentials
     const ADMIN_USER = 'admin';
@@ -64,8 +67,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update topbar title
             topbarTitle.textContent = link.textContent.trim();
+
+            // Mobile: Close sidebar after selection
+            if (window.innerWidth <= 991) {
+                closeMobileSidebar();
+            }
         });
     });
+
+    // Mobile Navigation Toggle
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+            // Change icon
+            const icon = menuToggle.querySelector('i');
+            if (sidebar.classList.contains('active')) {
+                icon.classList.replace('fa-bars', 'fa-times');
+            } else {
+                icon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+    }
+
+    function closeMobileSidebar() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        if (menuToggle) {
+            const icon = menuToggle.querySelector('i');
+            icon.classList.replace('fa-times', 'fa-bars');
+        }
+    }
 
     // Show/Hide Dashboard Functions
     function showDashboard() {
