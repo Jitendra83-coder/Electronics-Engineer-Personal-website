@@ -154,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     targetTab.classList.add('active');
                     topbarTitle.textContent = 'Contact Information';
                 }
+            } else if (action === 'profile') {
+                openProfileModal();
             } else {
                 alert(`Opening ${action} settings... (Feature coming soon)`);
             }
@@ -162,6 +164,181 @@ document.addEventListener('DOMContentLoaded', () => {
             profileDropdown.classList.remove('active');
         });
     });
+
+    // ===== Profile Update Modal Logic =====
+    const profileModalOverlay  = document.getElementById('profile-modal-overlay');
+    const profileModalClose    = document.getElementById('profile-modal-close');
+    const btnCancelProfile     = document.getElementById('btn-cancel-profile');
+    const btnSaveProfile       = document.getElementById('btn-save-profile');
+    const profilePicInput      = document.getElementById('profile-pic-input');
+    const profilePicPreview    = document.getElementById('profile-pic-preview');
+    const profilePicPlaceholder= document.getElementById('profile-pic-placeholder');
+    const btnRemoveProfilePic  = document.getElementById('btn-remove-profile-pic');
+    const profileDisplayName   = document.getElementById('profile-display-name');
+    const profileAdminEmail    = document.getElementById('profile-admin-email');
+
+    // Tracks the newly-selected image (base64) before saving
+    let pendingProfilePic = null;
+
+    function openProfileModal() {
+        if (!profileModalOverlay) return;
+
+        // Load saved values
+        const savedPic   = localStorage.getItem('adminProfilePic');
+        const savedName  = localStorage.getItem('adminDisplayName') || 'Admin';
+        const savedEmail = localStorage.getItem('adminEmail') || '';
+
+        profileDisplayName.value = savedName;
+        profileAdminEmail.value  = savedEmail;
+        pendingProfilePic = null;
+
+        if (savedPic) {
+            profilePicPreview.src = savedPic;
+            profilePicPreview.classList.add('visible');
+            profilePicPlaceholder.style.display = 'none';
+            btnRemoveProfilePic.style.display = 'flex';
+        } else {
+            profilePicPreview.src = '';
+            profilePicPreview.classList.remove('visible');
+            profilePicPlaceholder.style.display = 'flex';
+            btnRemoveProfilePic.style.display = 'none';
+        }
+
+        profileModalOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeProfileModal() {
+        if (!profileModalOverlay) return;
+        profileModalOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+        pendingProfilePic = null;
+        if (profilePicInput) profilePicInput.value = '';
+        // Always reset the Save button to its original state
+        if (btnSaveProfile) {
+            btnSaveProfile.innerHTML = '<i class="fas fa-save"></i> Save Profile';
+            btnSaveProfile.style.backgroundColor = '';
+        }
+    }
+
+    // Close on overlay background click
+    if (profileModalOverlay) {
+        profileModalOverlay.addEventListener('click', (e) => {
+            if (e.target === profileModalOverlay) closeProfileModal();
+        });
+    }
+    if (profileModalClose)  profileModalClose.addEventListener('click', closeProfileModal);
+    if (btnCancelProfile)   btnCancelProfile.addEventListener('click', closeProfileModal);
+
+    // Profile picture file selection
+    if (profilePicInput) {
+        profilePicInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            if (file.size > 3 * 1024 * 1024) {
+                alert('Image is too large. Please choose a file smaller than 3 MB.');
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                pendingProfilePic = e.target.result;
+                profilePicPreview.src = pendingProfilePic;
+                profilePicPreview.classList.add('visible');
+                profilePicPlaceholder.style.display = 'none';
+                btnRemoveProfilePic.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Remove profile picture
+    if (btnRemoveProfilePic) {
+        btnRemoveProfilePic.addEventListener('click', () => {
+            pendingProfilePic = '__REMOVE__';
+            profilePicPreview.src = '';
+            profilePicPreview.classList.remove('visible');
+            profilePicPlaceholder.style.display = 'flex';
+            btnRemoveProfilePic.style.display = 'none';
+            if (profilePicInput) profilePicInput.value = '';
+        });
+    }
+
+    // Save profile
+    if (btnSaveProfile) {
+        btnSaveProfile.addEventListener('click', function() {
+            const name  = profileDisplayName.value.trim();
+            const email = profileAdminEmail.value.trim();
+
+            if (!name) {
+                profileDisplayName.focus();
+                profileDisplayName.style.borderColor = 'var(--danger-color)';
+                setTimeout(() => profileDisplayName.style.borderColor = '', 1500);
+                return;
+            }
+
+            // Save text fields
+            localStorage.setItem('adminDisplayName', name);
+            localStorage.setItem('adminEmail', email);
+
+            // Save / remove picture
+            if (pendingProfilePic === '__REMOVE__') {
+                localStorage.removeItem('adminProfilePic');
+            } else if (pendingProfilePic) {
+                localStorage.setItem('adminProfilePic', pendingProfilePic);
+            }
+
+            // Update the topbar "Welcome, <name>" text
+            const welcomeStrong = document.querySelector('.user-info strong');
+            if (welcomeStrong) welcomeStrong.textContent = name;
+
+            // Update the topbar avatar if a picture is stored
+            const finalPic = localStorage.getItem('adminProfilePic');
+            const avatarIcon = document.querySelector('.user-info .fa-user-circle');
+            if (finalPic && avatarIcon) {
+                const existing = document.querySelector('.topbar-profile-pic');
+                if (existing) {
+                    existing.src = finalPic;
+                } else {
+                    const img = document.createElement('img');
+                    img.className = 'topbar-profile-pic';
+                    img.src = finalPic;
+                    img.style.cssText = 'width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-color);';
+                    avatarIcon.replaceWith(img);
+                }
+            } else if (!finalPic) {
+                const existing = document.querySelector('.topbar-profile-pic');
+                if (existing) {
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-user-circle';
+                    existing.replaceWith(icon);
+                }
+            }
+
+            // Visual feedback — close modal after brief confirmation
+            this.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            this.style.backgroundColor = '#4cc9f0';
+            setTimeout(() => {
+                closeProfileModal(); // button is reset inside closeProfileModal
+            }, 900);
+        });
+    }
+
+    // On page load: restore profile picture in topbar
+    (function restoreTopbarPic() {
+        const savedPic = localStorage.getItem('adminProfilePic');
+        if (!savedPic) return;
+        const avatarIcon = document.querySelector('.user-info .fa-user-circle');
+        if (avatarIcon) {
+            const img = document.createElement('img');
+            img.className = 'topbar-profile-pic';
+            img.src = savedPic;
+            img.style.cssText = 'width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-color);';
+            avatarIcon.replaceWith(img);
+        }
+    })();
 
     // Show/Hide Dashboard Functions
     function showDashboard() {

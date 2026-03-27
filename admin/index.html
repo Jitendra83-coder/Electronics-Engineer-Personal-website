@@ -50,7 +50,7 @@
             </div>
             <ul class="sidebar-menu">
                 <li class="active" data-tab="tab-dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
-                <li data-tab="tab-hero"><i class="fas fa-home"></i> Hero Section</li>
+                <li data-tab="tab-hero"><i class="fas fa-home"></i> Personal Information</li>
                 <li data-tab="tab-about"><i class="fas fa-user"></i> About Me</li>
                 <li data-tab="tab-education"><i class="fas fa-graduation-cap"></i> Education</li>
                 <li data-tab="tab-skills"><i class="fas fa-cogs"></i> Skills</li>
@@ -132,7 +132,7 @@
 
                 <!-- Hero Section Tab -->
                 <div id="tab-hero" class="tab-pane">
-                    <h3>Edit Hero Section</h3>
+                    <h3>Edit Personal Information</h3>
                     <form class="admin-form" id="form-hero">
                         <div class="form-group">
                             <label>Name</label>
@@ -558,6 +558,62 @@
 
             </div>
         </main>
+
+        <!-- ===== Profile Update Modal ===== -->
+        <div id="profile-modal-overlay" class="profile-modal-overlay" style="display:none;">
+            <div class="profile-modal">
+                <div class="profile-modal-header">
+                    <h3><i class="fas fa-user-edit"></i> Update Profile</h3>
+                    <button class="profile-modal-close" id="profile-modal-close"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="profile-modal-body">
+                    <!-- Profile Picture Upload -->
+                    <div class="profile-pic-section">
+                        <div class="profile-pic-wrapper">
+                            <img id="profile-pic-preview" src="" alt="Profile Picture" class="profile-pic-img">
+                            <div class="profile-pic-placeholder" id="profile-pic-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <label for="profile-pic-input" class="profile-pic-overlay">
+                                <i class="fas fa-camera"></i>
+                                <span>Change Photo</span>
+                            </label>
+                        </div>
+                        <input type="file" id="profile-pic-input" accept="image/*" style="display:none;">
+                        <p class="profile-pic-hint">Click the photo to upload a new picture<br><small>Supports JPG, PNG, GIF &bull; Max ~2 MB</small></p>
+                        <button type="button" id="btn-remove-profile-pic" class="btn-remove-pic" style="display:none;">
+                            <i class="fas fa-trash-alt"></i> Remove Photo
+                        </button>
+                    </div>
+
+                    <!-- Profile Details -->
+                    <div class="profile-details-section">
+                        <div class="form-group">
+                            <label for="profile-display-name">Display Name</label>
+                            <div class="input-icon">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="profile-display-name" placeholder="e.g. Jitendra Sharma">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-admin-email">Admin Email</label>
+                            <div class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="profile-admin-email" placeholder="e.g. admin@example.com">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-modal-footer">
+                    <button type="button" id="btn-cancel-profile" class="btn-logout" style="width:auto;padding:12px 25px;">Cancel</button>
+                    <button type="button" id="btn-save-profile" class="btn-save" style="width:auto;padding:12px 30px;">
+                        <i class="fas fa-save"></i> Save Profile
+                    </button>
+                </div>
+            </div>
+        </div>
         <!-- Overlay for mobile sidebar -->
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
     </div>
