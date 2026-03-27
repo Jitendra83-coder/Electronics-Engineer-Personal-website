@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const loginError = document.getElementById('login-error');
     const logoutBtn = document.getElementById('logout-btn');
-    
+
     // Tab Elements
     const tabLinks = document.querySelectorAll('.sidebar-menu li');
     const tabPanes = document.querySelectorAll('.tab-pane');
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
     const menuToggle = document.getElementById('menu-toggle');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
-    
+
     // Profile Dropdown Elements
     const userProfile = document.getElementById('user-profile');
     const profileDropdown = document.getElementById('profile-dropdown');
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Login Form Submit
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
+
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
 
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Hide all tab panes
             tabPanes.forEach(pane => pane.classList.remove('active'));
-            
+
             // Show the target tab pane
             const targetId = link.getAttribute('data-tab');
             document.getElementById(targetId).classList.add('active');
@@ -143,12 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', (e) => {
             e.stopPropagation();
             const action = item.getAttribute('data-action');
-            
+
             if (action === 'contact') {
                 // Switch to contact tab
                 tabLinks.forEach(l => l.classList.remove('active'));
                 tabPanes.forEach(pane => pane.classList.remove('active'));
-                
+
                 const targetTab = document.getElementById('tab-contact');
                 if (targetTab) {
                     targetTab.classList.add('active');
@@ -159,23 +159,23 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 alert(`Opening ${action} settings... (Feature coming soon)`);
             }
-            
+
             userProfile.classList.remove('active');
             profileDropdown.classList.remove('active');
         });
     });
 
     // ===== Profile Update Modal Logic =====
-    const profileModalOverlay  = document.getElementById('profile-modal-overlay');
-    const profileModalClose    = document.getElementById('profile-modal-close');
-    const btnCancelProfile     = document.getElementById('btn-cancel-profile');
-    const btnSaveProfile       = document.getElementById('btn-save-profile');
-    const profilePicInput      = document.getElementById('profile-pic-input');
-    const profilePicPreview    = document.getElementById('profile-pic-preview');
-    const profilePicPlaceholder= document.getElementById('profile-pic-placeholder');
-    const btnRemoveProfilePic  = document.getElementById('btn-remove-profile-pic');
-    const profileDisplayName   = document.getElementById('profile-display-name');
-    const profileAdminEmail    = document.getElementById('profile-admin-email');
+    const profileModalOverlay = document.getElementById('profile-modal-overlay');
+    const profileModalClose = document.getElementById('profile-modal-close');
+    const btnCancelProfile = document.getElementById('btn-cancel-profile');
+    const btnSaveProfile = document.getElementById('btn-save-profile');
+    const profilePicInput = document.getElementById('profile-pic-input');
+    const profilePicPreview = document.getElementById('profile-pic-preview');
+    const profilePicPlaceholder = document.getElementById('profile-pic-placeholder');
+    const btnRemoveProfilePic = document.getElementById('btn-remove-profile-pic');
+    const profileDisplayName = document.getElementById('profile-display-name');
+    const profileAdminEmail = document.getElementById('profile-admin-email');
 
     // Tracks the newly-selected image (base64) before saving
     let pendingProfilePic = null;
@@ -184,12 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!profileModalOverlay) return;
 
         // Load saved values
-        const savedPic   = localStorage.getItem('adminProfilePic');
-        const savedName  = localStorage.getItem('adminDisplayName') || 'Admin';
+        const savedPic = localStorage.getItem('adminProfilePic');
+        const savedName = localStorage.getItem('adminDisplayName') || 'Admin';
         const savedEmail = localStorage.getItem('adminEmail') || '';
 
         profileDisplayName.value = savedName;
-        profileAdminEmail.value  = savedEmail;
+        profileAdminEmail.value = savedEmail;
         pendingProfilePic = null;
 
         if (savedPic) {
@@ -227,12 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === profileModalOverlay) closeProfileModal();
         });
     }
-    if (profileModalClose)  profileModalClose.addEventListener('click', closeProfileModal);
-    if (btnCancelProfile)   btnCancelProfile.addEventListener('click', closeProfileModal);
+    if (profileModalClose) profileModalClose.addEventListener('click', closeProfileModal);
+    if (btnCancelProfile) btnCancelProfile.addEventListener('click', closeProfileModal);
 
     // Profile picture file selection
     if (profilePicInput) {
-        profilePicInput.addEventListener('change', function() {
+        profilePicInput.addEventListener('change', function () {
             const file = this.files[0];
             if (!file) return;
 
@@ -268,8 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save profile
     if (btnSaveProfile) {
-        btnSaveProfile.addEventListener('click', function() {
-            const name  = profileDisplayName.value.trim();
+        btnSaveProfile.addEventListener('click', function () {
+            // Guard against multiple clicks during animation
+            if (this.innerHTML.includes('Saving') || this.innerHTML.includes('Saved')) return;
+
+            const name = profileDisplayName.value.trim();
             const email = profileAdminEmail.value.trim();
 
             if (!name) {
@@ -354,25 +357,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('password').value = '';
     }
 
-    // --- MOCK SAVE FUNCTIONALITY ---
-    
+    // --- SAVE BUTTONS LOGIC ---
+
+    /**
+     * We filter out buttons that have dedicated listeners defined elsewhere 
+     * (like Hero, Profile, and dynamic items) to prevent visual feedback conflicts.
+     */
+    const saveBtns = document.querySelectorAll('.btn-save:not(#btn-save-hero):not(#btn-save-profile):not([id^="btn-save-about"]):not([id^="btn-save-objective"]):not([id^="btn-save-education"]):not([id^="btn-save-skill"]):not([id^="btn-save-project"]):not([id^="btn-save-experience"]):not([id^="btn-save-certificate"]):not(.contact-save-btn)');
+
     // Load existing data from LocalStorage
     const heroName = localStorage.getItem('heroName');
     const heroTitle = localStorage.getItem('heroTitle');
     const heroTagline = localStorage.getItem('heroTagline');
-    
+
     if (heroName) {
         document.getElementById('hero-name-input').value = heroName;
     } else {
         document.getElementById('hero-name-input').value = 'Jitendra Sharma';
     }
-    
+
     if (heroTitle) {
         document.getElementById('hero-title-input').value = heroTitle;
     } else {
         document.getElementById('hero-title-input').value = 'Electronics & Communication Engineer';
     }
-    
+
     if (heroTagline) {
         document.getElementById('hero-tagline-input').value = heroTagline;
     } else {
@@ -382,11 +391,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save Hero Section
     const btnSaveHero = document.getElementById('btn-save-hero');
     if (btnSaveHero) {
-        btnSaveHero.addEventListener('click', function() {
+        btnSaveHero.addEventListener('click', function () {
+            // Guard against multiple clicks during animation
+            if (this.innerHTML.includes('Saving') || this.innerHTML.includes('Saved')) return;
+
             const originalText = this.innerHTML;
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             this.style.opacity = '0.8';
-            
+
             // Save to localStorage
             localStorage.setItem('heroName', document.getElementById('hero-name-input').value);
             localStorage.setItem('heroTitle', document.getElementById('hero-title-input').value);
@@ -396,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 this.innerHTML = '<i class="fas fa-check"></i> Saved!';
                 this.style.backgroundColor = '#4cc9f0'; // Success color
-                
+
                 // Revert after 2 seconds
                 setTimeout(() => {
                     this.innerHTML = originalText;
@@ -407,21 +419,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Select all other save buttons
-    const saveBtns = document.querySelectorAll('.btn-save:not(#btn-save-hero)');
     saveBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
+            // Guard against multiple clicks during animation
+            if (this.innerHTML.includes('Saving') || this.innerHTML.includes('Saved')) return;
+
             const originalText = this.innerHTML;
-            
+
             // Visual feedback for saving
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             this.style.opacity = '0.8';
-            
+
             // Mock delay
             setTimeout(() => {
                 this.innerHTML = '<i class="fas fa-check"></i> Saved!';
                 this.style.backgroundColor = '#4cc9f0'; // Success color
-                
+
                 // Revert after 2 seconds
                 setTimeout(() => {
                     this.innerHTML = originalText;
@@ -435,8 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Delete buttons functionality mock
     const deleteBtns = document.querySelectorAll('.btn-delete');
     deleteBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            if(confirm('Are you sure you want to delete this item?')) {
+        btn.addEventListener('click', function () {
+            if (confirm('Are you sure you want to delete this item?')) {
                 const item = this.closest('.list-item');
                 item.style.opacity = '0.5';
                 setTimeout(() => {
@@ -449,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const aboutParagraphsList = document.getElementById('about-paragraphs-list');
     const btnAddAbout = document.getElementById('btn-add-about');
     const btnSaveAboutParagraphs = document.getElementById('btn-save-about-paragraphs');
-    
+
     // New form elements
     const aboutFormContainer = document.getElementById('about-form-container');
     const aboutFormTitle = document.getElementById('about-form-title');
@@ -458,7 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const aboutTextInput = document.getElementById('about-text-input');
     const btnSaveAboutItem = document.getElementById('btn-save-about-item');
     const btnCancelAboutItem = document.getElementById('btn-cancel-about-item');
-    
+
     // Default paragraphs if none in localStorage
     const defaultParagraphs = [
         { heading: "Professional Summary", text: "I am a dedicated Electronics & Communication Engineer with a strong foundation in communication systems, digital electronics, and embedded systems. My passion lies in developing innovative solutions that bridge the gap between hardware and software." },
@@ -475,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             aboutParagraphs = [...defaultParagraphs];
         }
-    } catch(e) {
+    } catch (e) {
         aboutParagraphs = [...defaultParagraphs];
     }
 
@@ -490,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aboutParagraphsList.innerHTML = '';
         aboutParagraphs.forEach((item, index) => {
             if (index === aboutEditingIndex) {
-                 const itemHTML = `
+                const itemHTML = `
                     <div class="list-item" style="flex-direction: column; align-items: stretch; background: #f8f9fa; border: 1px solid #e9ecef; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                         <h4 style="margin-bottom: 15px; color: #4361ee;"><i class="fas fa-edit"></i> Edit Paragraph</h4>
                         <div class="form-group" style="margin-bottom: 10px;">
@@ -527,7 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.querySelectorAll('.btn-edit-about').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 aboutFormContainer.style.display = 'none'; // Ensure top add form is hidden
                 aboutEditingIndex = parseInt(this.getAttribute('data-index'));
@@ -536,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.querySelectorAll('.btn-delete-about').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 const idx = parseInt(this.getAttribute('data-index'));
                 if (confirm('Are you sure you want to delete this item?')) {
@@ -550,38 +563,38 @@ document.addEventListener('DOMContentLoaded', () => {
         // Inline form buttons logic for About
         const btnSaveInlineAbout = document.querySelector('.inline-btn-save-about');
         if (btnSaveInlineAbout) {
-            btnSaveInlineAbout.addEventListener('click', function(e) {
-                 e.preventDefault();
-                 const textVal = document.getElementById('inline-about-text').value.trim();
-                 
-                 if (!textVal) {
-                     alert("Paragraph content is required.");
-                     return;
-                 }
+            btnSaveInlineAbout.addEventListener('click', function (e) {
+                e.preventDefault();
+                const textVal = document.getElementById('inline-about-text').value.trim();
 
-                 aboutParagraphs[aboutEditingIndex] = {
-                     heading: document.getElementById('inline-about-heading').value.trim(),
-                     text: textVal
-                 };
+                if (!textVal) {
+                    alert("Paragraph content is required.");
+                    return;
+                }
 
-                 saveAboutToStorage();
-                 
-                 const originalText = this.innerHTML;
-                 this.innerHTML = '<i class="fas fa-check"></i> Saved!';
-                 this.style.backgroundColor = '#4cc9f0'; 
-                 setTimeout(() => {
-                     aboutEditingIndex = -1;
-                     renderAboutParagraphs();
-                 }, 400);
+                aboutParagraphs[aboutEditingIndex] = {
+                    heading: document.getElementById('inline-about-heading').value.trim(),
+                    text: textVal
+                };
+
+                saveAboutToStorage();
+
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                this.style.backgroundColor = '#4cc9f0';
+                setTimeout(() => {
+                    aboutEditingIndex = -1;
+                    renderAboutParagraphs();
+                }, 400);
             });
         }
 
         const btnCancelInlineAbout = document.querySelector('.inline-btn-cancel-about');
         if (btnCancelInlineAbout) {
-            btnCancelInlineAbout.addEventListener('click', function(e) {
-                 e.preventDefault();
-                 aboutEditingIndex = -1;
-                 renderAboutParagraphs();
+            btnCancelInlineAbout.addEventListener('click', function (e) {
+                e.preventDefault();
+                aboutEditingIndex = -1;
+                renderAboutParagraphs();
             });
         }
     }
@@ -615,9 +628,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save form (for adding new)
     if (btnSaveAboutItem) {
-        btnSaveAboutItem.addEventListener('click', function(e) {
+        btnSaveAboutItem.addEventListener('click', function (e) {
             e.preventDefault();
-            
+
             const textValue = aboutTextInput.value.trim();
             if (!textValue) {
                 alert("Paragraph content is required!");
@@ -632,12 +645,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // This form is exclusively for adding new now
             aboutParagraphs.push(newItem);
             saveAboutToStorage();
-            
+
             // Visual feedback on the Save Item button
             const originalText = this.innerHTML;
             this.innerHTML = '<i class="fas fa-check"></i> Added!';
-            this.style.backgroundColor = '#4cc9f0'; 
-            
+            this.style.backgroundColor = '#4cc9f0';
+
             setTimeout(() => {
                 this.innerHTML = originalText;
                 this.style.backgroundColor = '';
@@ -649,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Backward compatibility for the main "Save Paragraphs" button (optional now that we save on edit/add)
     if (btnSaveAboutParagraphs) {
-        btnSaveAboutParagraphs.addEventListener('click', function(e) {
+        btnSaveAboutParagraphs.addEventListener('click', function (e) {
             e.preventDefault();
             saveAboutToStorage();
         });
@@ -658,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ABOUT OBJECTIVES SECTION RENDER & SAVE ---
     const aboutObjectivesList = document.getElementById('about-objectives-list');
     const btnAddObjective = document.getElementById('btn-add-objective');
-    
+
     // New form elements
     const objectiveFormContainer = document.getElementById('objective-form-container');
     const objectiveFormTitle = document.getElementById('objective-form-title');
@@ -668,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const objectiveTextInput = document.getElementById('objective-text-input');
     const btnSaveObjectiveItem = document.getElementById('btn-save-objective-item');
     const btnCancelObjectiveItem = document.getElementById('btn-cancel-objective-item');
-    
+
     const defaultObjective = {
         heading: "Career Objective",
         icon: "fas fa-bullseye",
@@ -684,12 +697,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check legacy string
             const legacyStr = localStorage.getItem('aboutObjective');
             if (legacyStr) {
-                aboutObjectives = [{...defaultObjective, text: legacyStr}];
+                aboutObjectives = [{ ...defaultObjective, text: legacyStr }];
             } else {
                 aboutObjectives = [defaultObjective];
             }
         }
-    } catch(e) {
+    } catch (e) {
         aboutObjectives = [defaultObjective];
     }
 
@@ -704,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aboutObjectivesList.innerHTML = '';
         aboutObjectives.forEach((item, index) => {
             if (index === objectiveEditingIndex) {
-                 const itemHTML = `
+                const itemHTML = `
                     <div class="list-item" style="flex-direction: column; align-items: stretch; background: #f8f9fa; border: 1px solid #e9ecef; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                         <h4 style="margin-bottom: 15px; color: #4361ee;"><i class="fas fa-edit"></i> Edit Objective Card</h4>
                         <div class="form-group" style="margin-bottom: 10px;">
@@ -746,7 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.querySelectorAll('.btn-edit-objective').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 objectiveFormContainer.style.display = 'none'; // Ensure top add form is hidden
                 objectiveEditingIndex = parseInt(this.getAttribute('data-index'));
@@ -755,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.querySelectorAll('.btn-delete-objective').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 const idx = parseInt(this.getAttribute('data-index'));
                 if (confirm('Are you sure you want to delete this objective card?')) {
@@ -769,39 +782,39 @@ document.addEventListener('DOMContentLoaded', () => {
         // Inline form buttons logic for Objectives
         const btnSaveInlineObj = document.querySelector('.inline-btn-save-obj');
         if (btnSaveInlineObj) {
-            btnSaveInlineObj.addEventListener('click', function(e) {
-                 e.preventDefault();
-                 const textVal = document.getElementById('inline-obj-text').value.trim();
-                 
-                 if (!textVal) {
-                     alert("Paragraph content is required.");
-                     return;
-                 }
+            btnSaveInlineObj.addEventListener('click', function (e) {
+                e.preventDefault();
+                const textVal = document.getElementById('inline-obj-text').value.trim();
 
-                 aboutObjectives[objectiveEditingIndex] = {
-                     heading: document.getElementById('inline-obj-heading').value.trim() || 'Career Objective',
-                     icon: document.getElementById('inline-obj-icon').value.trim() || 'fas fa-bullseye',
-                     text: textVal
-                 };
+                if (!textVal) {
+                    alert("Paragraph content is required.");
+                    return;
+                }
 
-                 saveObjectivesToStorage();
-                 
-                 const originalText = this.innerHTML;
-                 this.innerHTML = '<i class="fas fa-check"></i> Saved!';
-                 this.style.backgroundColor = '#4cc9f0'; 
-                 setTimeout(() => {
-                     objectiveEditingIndex = -1;
-                     renderAboutObjectives();
-                 }, 400);
+                aboutObjectives[objectiveEditingIndex] = {
+                    heading: document.getElementById('inline-obj-heading').value.trim() || 'Career Objective',
+                    icon: document.getElementById('inline-obj-icon').value.trim() || 'fas fa-bullseye',
+                    text: textVal
+                };
+
+                saveObjectivesToStorage();
+
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                this.style.backgroundColor = '#4cc9f0';
+                setTimeout(() => {
+                    objectiveEditingIndex = -1;
+                    renderAboutObjectives();
+                }, 400);
             });
         }
 
         const btnCancelInlineObj = document.querySelector('.inline-btn-cancel-obj');
         if (btnCancelInlineObj) {
-            btnCancelInlineObj.addEventListener('click', function(e) {
-                 e.preventDefault();
-                 objectiveEditingIndex = -1;
-                 renderAboutObjectives();
+            btnCancelInlineObj.addEventListener('click', function (e) {
+                e.preventDefault();
+                objectiveEditingIndex = -1;
+                renderAboutObjectives();
             });
         }
     }
@@ -833,9 +846,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnSaveObjectiveItem) {
-        btnSaveObjectiveItem.addEventListener('click', function(e) {
+        btnSaveObjectiveItem.addEventListener('click', function (e) {
             e.preventDefault();
-            
+
             const textValue = objectiveTextInput.value.trim();
             if (!textValue) {
                 alert("Paragraph content is required!");
@@ -851,11 +864,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // This form is exclusively for adding new now
             aboutObjectives.push(newItem);
             saveObjectivesToStorage();
-            
+
             const originalText = this.innerHTML;
             this.innerHTML = '<i class="fas fa-check"></i> Added!';
-            this.style.backgroundColor = '#4cc9f0'; 
-            
+            this.style.backgroundColor = '#4cc9f0';
+
             setTimeout(() => {
                 this.innerHTML = originalText;
                 this.style.backgroundColor = '';
@@ -869,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- EDUCATION SECTION RENDER & SAVE ---
     const educationList = document.getElementById('education-list');
     const btnAddEducation = document.getElementById('btn-add-education');
-    
+
     // Form elements
     const educationFormContainer = document.getElementById('education-form-container');
     const educationFormTitle = document.getElementById('education-form-title');
@@ -881,7 +894,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const educationUniversityInput = document.getElementById('education-university-input');
     const btnSaveEducationItem = document.getElementById('btn-save-education-item');
     const btnCancelEducationItem = document.getElementById('btn-cancel-education-item');
-    
+
     // Default mock data
     const defaultEducation = [
         {
@@ -906,7 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             educationItems = [...defaultEducation];
         }
-    } catch(e) {
+    } catch (e) {
         educationItems = [...defaultEducation];
     }
 
@@ -921,7 +934,7 @@ document.addEventListener('DOMContentLoaded', () => {
         educationList.innerHTML = '';
         educationItems.forEach((item, index) => {
             if (index === educationEditingIndex) {
-                 const itemHTML = `
+                const itemHTML = `
                     <div class="list-item" style="flex-direction: column; align-items: stretch; background: #f8f9fa; border: 1px solid #e9ecef; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                         <h4 style="margin-bottom: 15px; color: #4361ee;"><i class="fas fa-edit"></i> Edit Education</h4>
                         <div class="form-group" style="margin-bottom: 10px;">
@@ -971,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.querySelectorAll('.btn-edit-education').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 educationFormContainer.style.display = 'none'; // Ensure top add form is hidden
                 educationEditingIndex = parseInt(this.getAttribute('data-index'));
@@ -980,7 +993,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.querySelectorAll('.btn-delete-education').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 const idx = parseInt(this.getAttribute('data-index'));
                 if (confirm('Are you sure you want to delete this education item?')) {
@@ -994,42 +1007,42 @@ document.addEventListener('DOMContentLoaded', () => {
         // Inline form buttons logic
         const btnSaveInlineEdu = document.querySelector('.inline-btn-save-edu');
         if (btnSaveInlineEdu) {
-            btnSaveInlineEdu.addEventListener('click', function(e) {
-                 e.preventDefault();
-                 const levelVal = document.getElementById('inline-edu-level').value.trim();
-                 const courseVal = document.getElementById('inline-edu-course').value.trim();
-                 
-                 if (!levelVal && !courseVal) {
-                     alert("Please provide at least a Level or Course Name.");
-                     return;
-                 }
+            btnSaveInlineEdu.addEventListener('click', function (e) {
+                e.preventDefault();
+                const levelVal = document.getElementById('inline-edu-level').value.trim();
+                const courseVal = document.getElementById('inline-edu-course').value.trim();
 
-                 educationItems[educationEditingIndex] = {
-                     level: levelVal,
-                     course: courseVal,
-                     year: document.getElementById('inline-edu-year').value.trim(),
-                     percentage: document.getElementById('inline-edu-percent').value.trim(),
-                     university: document.getElementById('inline-edu-univ').value.trim()
-                 };
+                if (!levelVal && !courseVal) {
+                    alert("Please provide at least a Level or Course Name.");
+                    return;
+                }
 
-                 saveEducationToStorage();
-                 
-                 const originalText = this.innerHTML;
-                 this.innerHTML = '<i class="fas fa-check"></i> Saved!';
-                 this.style.backgroundColor = '#4cc9f0'; 
-                 setTimeout(() => {
-                     educationEditingIndex = -1;
-                     renderEducationItems();
-                 }, 400);
+                educationItems[educationEditingIndex] = {
+                    level: levelVal,
+                    course: courseVal,
+                    year: document.getElementById('inline-edu-year').value.trim(),
+                    percentage: document.getElementById('inline-edu-percent').value.trim(),
+                    university: document.getElementById('inline-edu-univ').value.trim()
+                };
+
+                saveEducationToStorage();
+
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                this.style.backgroundColor = '#4cc9f0';
+                setTimeout(() => {
+                    educationEditingIndex = -1;
+                    renderEducationItems();
+                }, 400);
             });
         }
 
         const btnCancelInlineEdu = document.querySelector('.inline-btn-cancel-edu');
         if (btnCancelInlineEdu) {
-            btnCancelInlineEdu.addEventListener('click', function(e) {
-                 e.preventDefault();
-                 educationEditingIndex = -1;
-                 renderEducationItems();
+            btnCancelInlineEdu.addEventListener('click', function (e) {
+                e.preventDefault();
+                educationEditingIndex = -1;
+                renderEducationItems();
             });
         }
     }
@@ -1048,7 +1061,7 @@ document.addEventListener('DOMContentLoaded', () => {
             educationYearInput.value = '';
             educationPercentageInput.value = '';
             educationUniversityInput.value = '';
-            
+
             educationFormTitle.textContent = "Add New Education";
             educationFormContainer.style.display = 'block';
             educationFormContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1064,13 +1077,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnSaveEducationItem) {
-        btnSaveEducationItem.addEventListener('click', function(e) {
+        btnSaveEducationItem.addEventListener('click', function (e) {
             e.preventDefault();
-            
+
             const levelVal = educationLevelInput.value.trim();
             const courseVal = educationCourseInput.value.trim();
             const yearVal = educationYearInput.value.trim();
-            
+
             if (!levelVal && !courseVal) {
                 alert("Please provide at least a Level or Course Name.");
                 return;
@@ -1087,11 +1100,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // This form is exclusively for adding new now
             educationItems.push(newItem);
             saveEducationToStorage();
-            
+
             const originalText = this.innerHTML;
             this.innerHTML = '<i class="fas fa-check"></i> Added!';
-            this.style.backgroundColor = '#4cc9f0'; 
-            
+            this.style.backgroundColor = '#4cc9f0';
+
             setTimeout(() => {
                 this.innerHTML = originalText;
                 this.style.backgroundColor = '';
@@ -1104,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SKILLS SECTION RENDER & SAVE ---
     const skillsList = document.getElementById('skills-list');
     const btnAddSkill = document.getElementById('btn-add-skill');
-    
+
     // Form elements
     const skillFormContainer = document.getElementById('skill-form-container');
     const skillFormTitle = document.getElementById('skill-form-title');
@@ -1115,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const skillPercentageInput = document.getElementById('skill-percentage-input');
     const btnSaveSkillItem = document.getElementById('btn-save-skill-item');
     const btnCancelSkillItem = document.getElementById('btn-cancel-skill-item');
-    
+
     // Default mock data (to simulate index.html structure)
     const defaultSkills = [
         { category: "Electronics", icon: "fas fa-microchip", name: "Communication Systems", percentage: "85" },
@@ -1140,7 +1153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             skillsItems = [...defaultSkills];
         }
-    } catch(e) {
+    } catch (e) {
         skillsItems = [...defaultSkills];
     }
 
@@ -1190,20 +1203,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Event listeners for category selection
             document.querySelectorAll('.btn-open-category').forEach(card => {
-                card.addEventListener('click', function() {
+                card.addEventListener('click', function () {
                     currentSkillCategory = this.getAttribute('data-category');
                     renderSkillsItems();
                 });
             });
 
-            document.getElementById('btn-create-new-cat').addEventListener('click', function() {
+            document.getElementById('btn-create-new-cat').addEventListener('click', function () {
                 skillEditingIndex = -1;
                 skillItemIndex.value = "-1";
                 skillCategoryInput.value = '';
-                skillIconInput.value = 'fas fa-code';
+                skillIconInput.value = 'fas fa-briefcase';
                 skillNameInput.value = '';
                 skillPercentageInput.value = '';
-                
+
                 skillFormTitle.textContent = "Create New Skill Category";
                 skillFormContainer.style.display = 'block';
                 skillFormContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1215,7 +1228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const catItems = skillsItems
                 .map((item, index) => ({ ...item, originalIndex: index }))
                 .filter(item => item.category === currentSkillCategory);
-                
+
             const catIcon = catItems.length > 0 ? catItems[0].icon : 'fas fa-star';
 
             const headerHTML = `
@@ -1274,20 +1287,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            document.getElementById('btn-back-to-categories').addEventListener('click', function() {
+            document.getElementById('btn-back-to-categories').addEventListener('click', function () {
                 currentSkillCategory = null;
                 skillEditingIndex = -1;
                 renderSkillsItems();
             });
 
-            document.getElementById('btn-add-skill-to-this-cat').addEventListener('click', function() {
+            document.getElementById('btn-add-skill-to-this-cat').addEventListener('click', function () {
                 skillEditingIndex = -1;
                 skillItemIndex.value = "-1";
                 skillCategoryInput.value = currentSkillCategory;
                 skillIconInput.value = catIcon;
                 skillNameInput.value = '';
                 skillPercentageInput.value = '';
-                
+
                 skillFormTitle.textContent = `Add New Skill to ${currentSkillCategory}`;
                 skillFormContainer.style.display = 'block';
                 skillFormContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1295,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelectorAll('.btn-edit-skill').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     skillFormContainer.style.display = 'none';
                     skillEditingIndex = parseInt(this.getAttribute('data-index'));
@@ -1304,7 +1317,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelectorAll('.btn-delete-skill').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     const idx = parseInt(this.getAttribute('data-index'));
                     if (confirm('Are you sure you want to delete this skill?')) {
@@ -1318,37 +1331,37 @@ document.addEventListener('DOMContentLoaded', () => {
             // Inline form buttons logic
             const btnSaveInlineSkill = document.querySelector('.inline-btn-save-skill');
             if (btnSaveInlineSkill) {
-                btnSaveInlineSkill.addEventListener('click', function(e) {
-                     e.preventDefault();
-                     const nameVal = document.getElementById('inline-skill-name').value.trim();
-                     if (!nameVal) {
-                         alert("Please provide at least a Skill Name.");
-                         return;
-                     }
+                btnSaveInlineSkill.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const nameVal = document.getElementById('inline-skill-name').value.trim();
+                    if (!nameVal) {
+                        alert("Please provide at least a Skill Name.");
+                        return;
+                    }
 
-                     skillsItems[skillEditingIndex] = {
-                         ...skillsItems[skillEditingIndex],
-                         name: nameVal,
-                         percentage: document.getElementById('inline-skill-percent').value.trim()
-                     };
+                    skillsItems[skillEditingIndex] = {
+                        ...skillsItems[skillEditingIndex],
+                        name: nameVal,
+                        percentage: document.getElementById('inline-skill-percent').value.trim()
+                    };
 
-                     saveSkillsToStorage();
-                     
-                     this.innerHTML = '<i class="fas fa-check"></i> Saved!';
-                     this.style.backgroundColor = '#4cc9f0'; 
-                     setTimeout(() => {
-                         skillEditingIndex = -1;
-                         renderSkillsItems();
-                     }, 400);
+                    saveSkillsToStorage();
+
+                    this.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                    this.style.backgroundColor = '#4cc9f0';
+                    setTimeout(() => {
+                        skillEditingIndex = -1;
+                        renderSkillsItems();
+                    }, 400);
                 });
             }
 
             const btnCancelInlineSkill = document.querySelector('.inline-btn-cancel-skill');
             if (btnCancelInlineSkill) {
-                btnCancelInlineSkill.addEventListener('click', function(e) {
-                     e.preventDefault();
-                     skillEditingIndex = -1;
-                     renderSkillsItems();
+                btnCancelInlineSkill.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    skillEditingIndex = -1;
+                    renderSkillsItems();
                 });
             }
         }
@@ -1364,12 +1377,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnSaveSkillItem) {
-        btnSaveSkillItem.addEventListener('click', function(e) {
+        btnSaveSkillItem.addEventListener('click', function (e) {
             e.preventDefault();
-            
+
             const nameVal = skillNameInput.value.trim();
             const catVal = skillCategoryInput.value.trim();
-            
+
             if (!nameVal || !catVal) {
                 alert("Please provide both a Category and Skill Name.");
                 return;
@@ -1384,10 +1397,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             skillsItems.push(newItem);
             saveSkillsToStorage();
-            
+
             this.innerHTML = '<i class="fas fa-check"></i> Added!';
-            this.style.backgroundColor = '#4cc9f0'; 
-            
+            this.style.backgroundColor = '#4cc9f0';
+
             setTimeout(() => {
                 this.innerHTML = 'Save Skill';
                 this.style.backgroundColor = '';
@@ -1415,60 +1428,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelProjectItem = document.getElementById('btn-cancel-project-item');
 
     const defaultProjects = [
-        { 
-            category: "IoT", 
-            icon: "fas fa-home", 
-            title: "Smart Home Automation System", 
+        {
+            category: "IoT",
+            icon: "fas fa-home",
+            title: "Smart Home Automation System",
             description: "Developed an IoT-based home automation system using ESP32 and sensors for controlling lights, fans, and monitoring temperature.",
             image: "https://images.unsplash.com/photo-1558002038-1055907df827?w=600&h=400&fit=crop",
             tags: "ESP32, Arduino, IoT, Mobile App",
             github: "https://github.com",
             demo: "#"
         },
-        { 
-            category: "Software", 
-            icon: "fas fa-file-audio", 
-            title: "Digital Signal Processing for Audio", 
+        {
+            category: "Software",
+            icon: "fas fa-file-audio",
+            title: "Digital Signal Processing for Audio",
             description: "Implemented various DSP algorithms for audio signal processing including noise reduction, equalization, and compression using MATLAB and Python.",
             image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&h=400&fit=crop",
             tags: "MATLAB, Python, DSP, Audio",
             github: "https://github.com",
             demo: "#"
         },
-        { 
-            category: "Embedded", 
-            icon: "fas fa-id-card", 
-            title: "RFID-Based Attendance System", 
+        {
+            category: "Embedded",
+            icon: "fas fa-id-card",
+            title: "RFID-Based Attendance System",
             description: "Created an automated attendance system using RFID technology and Arduino. Integrated with a database for real-time tracking.",
             image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop",
             tags: "RFID, Arduino, MySQL, C++",
             github: "https://github.com",
             demo: "#"
         },
-        { 
-            category: "Electronics", 
-            icon: "fas fa-bolt", 
-            title: "Wireless Power Transfer System", 
+        {
+            category: "Electronics",
+            icon: "fas fa-bolt",
+            title: "Wireless Power Transfer System",
             description: "Designed and implemented a wireless power transfer system based on electromagnetic induction principles for charging small electronic devices.",
             image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop",
             tags: "Circuit Design, Power Electronics, Proteus",
             github: "https://github.com",
             demo: "#"
         },
-        { 
-            category: "Robotics", 
-            icon: "fas fa-robot", 
-            title: "Voice-Controlled Robot", 
+        {
+            category: "Robotics",
+            icon: "fas fa-robot",
+            title: "Voice-Controlled Robot",
             description: "Built a voice-controlled mobile robot using speech recognition modules and motor drivers. Programmed with Arduino.",
             image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&h=400&fit=crop",
             tags: "Arduino, Speech Recognition, Robotics, C",
             github: "https://github.com",
             demo: "#"
         },
-        { 
-            category: "Healthcare", 
-            icon: "fas fa-heartbeat", 
-            title: "Heart Rate Monitoring System", 
+        {
+            category: "Healthcare",
+            icon: "fas fa-heartbeat",
+            title: "Heart Rate Monitoring System",
             description: "Developed a portable heart rate monitoring device using pulse sensor and Arduino. Displays real-time data on LCD.",
             image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=400&fit=crop",
             tags: "Arduino, Sensors, Healthcare, Embedded C",
@@ -1520,13 +1533,13 @@ document.addEventListener('DOMContentLoaded', () => {
             projectsList.innerHTML = gridHTML;
 
             document.querySelectorAll('.btn-open-project-category').forEach(card => {
-                card.addEventListener('click', function() {
+                card.addEventListener('click', function () {
                     currentProjectCategory = this.getAttribute('data-category');
                     renderProjectsItems();
                 });
             });
 
-            document.getElementById('btn-create-new-project-cat').addEventListener('click', function() {
+            document.getElementById('btn-create-new-project-cat').addEventListener('click', function () {
                 projectEditingIndex = -1;
                 projectItemIndex.value = "-1";
                 projectCategoryInput.value = '';
@@ -1537,7 +1550,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectTagsInput.value = '';
                 projectGithubInput.value = '';
                 projectDemoInput.value = '';
-                
+
                 projectFormTitle.textContent = "Create New Project Category";
                 projectFormContainer.style.display = 'block';
                 projectFormContainer.scrollIntoView({ behavior: 'smooth' });
@@ -1548,7 +1561,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const catItems = projectsItems
                 .map((item, index) => ({ ...item, originalIndex: index }))
                 .filter(item => item.category === currentProjectCategory);
-                
+
             const catIcon = catItems.length > 0 ? catItems[0].icon : 'fas fa-project-diagram';
 
             const headerHTML = `
@@ -1628,13 +1641,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            document.getElementById('btn-back-to-project-categories').addEventListener('click', function() {
+            document.getElementById('btn-back-to-project-categories').addEventListener('click', function () {
                 currentProjectCategory = null;
                 projectEditingIndex = -1;
                 renderProjectsItems();
             });
 
-            document.getElementById('btn-add-project-to-this-cat').addEventListener('click', function() {
+            document.getElementById('btn-add-project-to-this-cat').addEventListener('click', function () {
                 projectEditingIndex = -1;
                 projectItemIndex.value = "-1";
                 projectCategoryInput.value = currentProjectCategory;
@@ -1645,7 +1658,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 projectTagsInput.value = '';
                 projectGithubInput.value = '';
                 projectDemoInput.value = '';
-                
+
                 projectFormTitle.textContent = `Add Project to ${currentProjectCategory}`;
                 projectFormContainer.style.display = 'block';
                 projectFormContainer.scrollIntoView({ behavior: 'smooth' });
@@ -1653,7 +1666,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelectorAll('.btn-edit-project').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     projectFormContainer.style.display = 'none';
                     projectEditingIndex = parseInt(this.getAttribute('data-index'));
@@ -1662,7 +1675,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelectorAll('.btn-delete-project').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     const idx = parseInt(this.getAttribute('data-index'));
                     if (confirm('Are you sure you want to delete this project?')) {
@@ -1675,36 +1688,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btnSaveInlineProject = document.querySelector('.inline-btn-save-project');
             if (btnSaveInlineProject) {
-                btnSaveInlineProject.addEventListener('click', function(e) {
-                     e.preventDefault();
-                     const titleVal = document.getElementById('inline-project-title').value.trim();
-                     if (!titleVal) {
-                         alert("Please provide a Project Title.");
-                         return;
-                     }
+                btnSaveInlineProject.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const titleVal = document.getElementById('inline-project-title').value.trim();
+                    if (!titleVal) {
+                        alert("Please provide a Project Title.");
+                        return;
+                    }
 
-                     projectsItems[projectEditingIndex] = {
-                         ...projectsItems[projectEditingIndex],
-                         title: titleVal,
-                         description: document.getElementById('inline-project-desc').value.trim(),
-                         image: document.getElementById('inline-project-image').value.trim(),
-                         tags: document.getElementById('inline-project-tags').value.trim(),
-                         github: document.getElementById('inline-project-github').value.trim(),
-                         demo: document.getElementById('inline-project-demo').value.trim()
-                     };
+                    projectsItems[projectEditingIndex] = {
+                        ...projectsItems[projectEditingIndex],
+                        title: titleVal,
+                        description: document.getElementById('inline-project-desc').value.trim(),
+                        image: document.getElementById('inline-project-image').value.trim(),
+                        tags: document.getElementById('inline-project-tags').value.trim(),
+                        github: document.getElementById('inline-project-github').value.trim(),
+                        demo: document.getElementById('inline-project-demo').value.trim()
+                    };
 
-                     saveProjectsToStorage();
-                     projectEditingIndex = -1;
-                     renderProjectsItems();
+                    saveProjectsToStorage();
+                    projectEditingIndex = -1;
+                    renderProjectsItems();
                 });
             }
 
             const btnCancelInlineProject = document.querySelector('.inline-btn-cancel-project');
             if (btnCancelInlineProject) {
-                btnCancelInlineProject.addEventListener('click', function(e) {
-                     e.preventDefault();
-                     projectEditingIndex = -1;
-                     renderProjectsItems();
+                btnCancelInlineProject.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    projectEditingIndex = -1;
+                    renderProjectsItems();
                 });
             }
         }
@@ -1713,11 +1726,11 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProjectsItems();
 
     if (btnSaveProjectItem) {
-        btnSaveProjectItem.addEventListener('click', function(e) {
+        btnSaveProjectItem.addEventListener('click', function (e) {
             e.preventDefault();
             const titleVal = projectTitleInput.value.trim();
             const catVal = projectCategoryInput.value.trim();
-            
+
             if (!titleVal || !catVal) {
                 alert("Please provide Category and Title.");
                 return;
@@ -1736,10 +1749,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             projectsItems.push(newItem);
             saveProjectsToStorage();
-            
+
             this.innerHTML = '<i class="fas fa-check"></i> Added!';
-            this.style.backgroundColor = '#4cc9f0'; 
-            
+            this.style.backgroundColor = '#4cc9f0';
+
             setTimeout(() => {
                 this.innerHTML = 'Save Project';
                 this.style.backgroundColor = '';
@@ -1773,66 +1786,66 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelExperienceItem = document.getElementById('btn-cancel-experience-item');
 
     const defaultExperience = [
-        { 
-            badge: "Full Time Job", 
-            icon: "fas fa-calendar-check", 
-            duration: "January 2023 - Till Date", 
-            title: "Trainer & IT Support Engineer", 
-            company: "Citizen Infotech Pvt. Ltd.", 
+        {
+            badge: "Full Time Job",
+            icon: "fas fa-calendar-check",
+            duration: "January 2023 - Till Date",
+            title: "Trainer & IT Support Engineer",
+            company: "Citizen Infotech Pvt. Ltd.",
             description: "Full-time Software Trainer responsible for delivering hands-on IT and software training, curriculum development, student mentoring, project guidance, and skill evaluation.",
             tags: "eHMIS, EHR, IDMS, MCH, IDSP"
         },
-        { 
-            badge: "Full Time Job", 
-            icon: "fas fa-briefcase", 
-            duration: "November 2021 - July 2023", 
-            title: "IT Officer", 
-            company: "Hamro Madhyaworti Saving & Credit Co-operative Society Ltd.", 
+        {
+            badge: "Full Time Job",
+            icon: "fas fa-briefcase",
+            duration: "November 2021 - July 2023",
+            title: "IT Officer",
+            company: "Hamro Madhyaworti Saving & Credit Co-operative Society Ltd.",
             description: "Managed IT infrastructure, cooperative software systems, data security, technical support, backups, networking, and digitization of operations.",
             tags: "IT infrastructure, Cybersecurity, Systems, Database"
         },
-        { 
-            badge: "Full Time Job", 
-            icon: "fas fa-tools", 
-            duration: "October 2021 to Present", 
-            title: "Technical Support", 
-            company: "Highway Techno Institute Pvt. Ltd.", 
+        {
+            badge: "Full Time Job",
+            icon: "fas fa-tools",
+            duration: "October 2021 to Present",
+            title: "Technical Support",
+            company: "Highway Techno Institute Pvt. Ltd.",
             description: "Technical Support Officer responsible for system setup, troubleshooting, lab management, user support, networking, and technical assistance.",
             tags: "Operating Systems, Cybersecurity, Troubleshooting, Networking"
         },
-        { 
-            badge: "Workshop", 
-            icon: "fas fa-award", 
-            duration: "January 2020", 
-            title: "ROBOTC Compitition", 
-            company: "JNTUH", 
+        {
+            badge: "Workshop",
+            icon: "fas fa-award",
+            duration: "January 2020",
+            title: "ROBOTC Compitition",
+            company: "JNTUH",
             description: "Participated in a hands-on workshop focusing on Arduino and ARM microcontroller programming, sensor interfacing, and real-time embedded applications.",
             tags: "Arduino, ARM, Sensors, Microcontrollers"
         },
-        { 
-            badge: "Internship", 
-            icon: "fas fa-award", 
-            duration: "June 2020 - July 2020", 
-            title: "IMU Section, IT, Transmission & Mobile Project", 
-            company: "Nepal Telecom", 
+        {
+            badge: "Internship",
+            icon: "fas fa-award",
+            duration: "June 2020 - July 2020",
+            title: "IMU Section, IT, Transmission & Mobile Project",
+            company: "Nepal Telecom",
             description: "Certified in IMU Section, IT, Transmission & Mobile Project. Gained exposure to telecom infrastructure and mobile networking.",
             tags: "IMU, IT, Transmission, Mobile Networking"
         },
-        { 
-            badge: "Training", 
-            icon: "fas fa-calendar-alt", 
-            duration: "1 June 2016 - 15 July 2016", 
-            title: "Embedded Systems Design & Programming", 
-            company: "NetMax Technology Pvt.Ltd.", 
+        {
+            badge: "Training",
+            icon: "fas fa-calendar-alt",
+            duration: "1 June 2016 - 15 July 2016",
+            title: "Embedded Systems Design & Programming",
+            company: "NetMax Technology Pvt.Ltd.",
             description: "Completed comprehensive training in VLSI design covering RTL design, synthesis, and verification.",
             tags: "VLSI, Verilog, FPGA, RTL Design"
         },
-        { 
-            badge: "Internship", 
-            icon: "fas fa-briefcase", 
-            duration: "June 2015 - August 2015", 
-            title: "Electronics Design Intern", 
-            company: "Tech Solutions Pvt. Ltd.", 
+        {
+            badge: "Internship",
+            icon: "fas fa-briefcase",
+            duration: "June 2015 - August 2015",
+            title: "Electronics Design Intern",
+            company: "Tech Solutions Pvt. Ltd.",
             description: "Worked on PCB design and testing for IoT devices. Collaborated with senior engineers on embedded systems development.",
             tags: "PCB Design, Embedded Systems, Testing, IoT"
         }
@@ -1881,13 +1894,13 @@ document.addEventListener('DOMContentLoaded', () => {
             experienceList.innerHTML = gridHTML;
 
             document.querySelectorAll('.btn-open-experience-category').forEach(card => {
-                card.addEventListener('click', function() {
+                card.addEventListener('click', function () {
                     currentExperienceCategory = this.getAttribute('data-category');
                     renderExperienceItems();
                 });
             });
 
-            document.getElementById('btn-create-new-experience-cat').addEventListener('click', function() {
+            document.getElementById('btn-create-new-experience-cat').addEventListener('click', function () {
                 experienceEditingIndex = -1;
                 experienceBadgeInput.value = '';
                 experienceIconInput.value = 'fas fa-briefcase';
@@ -1896,7 +1909,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 experienceCompanyInput.value = '';
                 experienceDescriptionInput.value = '';
                 experienceTagsInput.value = '';
-                
+
                 experienceFormTitle.textContent = "Add New Experience Type";
                 experienceFormContainer.style.display = 'block';
                 experienceFormContainer.scrollIntoView({ behavior: 'smooth' });
@@ -1907,7 +1920,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const catItems = experienceItems
                 .map((item, index) => ({ ...item, originalIndex: index }))
                 .filter(item => item.badge === currentExperienceCategory);
-                
+
             const catIcon = catItems.length > 0 ? catItems[0].icon : 'fas fa-briefcase';
 
             const headerHTML = `
@@ -1978,13 +1991,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            document.getElementById('btn-back-to-experience-categories').addEventListener('click', function() {
+            document.getElementById('btn-back-to-experience-categories').addEventListener('click', function () {
                 currentExperienceCategory = null;
                 experienceEditingIndex = -1;
                 renderExperienceItems();
             });
 
-            document.getElementById('btn-add-experience-to-this-cat').addEventListener('click', function() {
+            document.getElementById('btn-add-experience-to-this-cat').addEventListener('click', function () {
                 experienceEditingIndex = -1;
                 experienceBadgeInput.value = currentExperienceCategory;
                 experienceIconInput.value = catIcon;
@@ -1993,7 +2006,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 experienceCompanyInput.value = '';
                 experienceDescriptionInput.value = '';
                 experienceTagsInput.value = '';
-                
+
                 experienceFormTitle.textContent = `Add ${currentExperienceCategory}`;
                 experienceFormContainer.style.display = 'block';
                 experienceFormContainer.scrollIntoView({ behavior: 'smooth' });
@@ -2001,7 +2014,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelectorAll('.btn-edit-experience').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     experienceFormContainer.style.display = 'none';
                     experienceEditingIndex = parseInt(this.getAttribute('data-index'));
@@ -2010,7 +2023,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelectorAll('.btn-delete-experience').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     const idx = parseInt(this.getAttribute('data-index'));
                     if (confirm('Are you sure you want to delete this experience?')) {
@@ -2023,35 +2036,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btnSaveInlineExperience = document.querySelector('.inline-btn-save-experience');
             if (btnSaveInlineExperience) {
-                btnSaveInlineExperience.addEventListener('click', function(e) {
-                     e.preventDefault();
-                     const titleVal = document.getElementById('inline-exp-title').value.trim();
-                     if (!titleVal) {
-                         alert("Please provide a Title.");
-                         return;
-                     }
+                btnSaveInlineExperience.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const titleVal = document.getElementById('inline-exp-title').value.trim();
+                    if (!titleVal) {
+                        alert("Please provide a Title.");
+                        return;
+                    }
 
-                     experienceItems[experienceEditingIndex] = {
-                         ...experienceItems[experienceEditingIndex],
-                         title: titleVal,
-                         duration: document.getElementById('inline-exp-duration').value.trim(),
-                         company: document.getElementById('inline-exp-company').value.trim(),
-                         description: document.getElementById('inline-exp-desc').value.trim(),
-                         tags: document.getElementById('inline-exp-tags').value.trim()
-                     };
+                    experienceItems[experienceEditingIndex] = {
+                        ...experienceItems[experienceEditingIndex],
+                        title: titleVal,
+                        duration: document.getElementById('inline-exp-duration').value.trim(),
+                        company: document.getElementById('inline-exp-company').value.trim(),
+                        description: document.getElementById('inline-exp-desc').value.trim(),
+                        tags: document.getElementById('inline-exp-tags').value.trim()
+                    };
 
-                     saveExperienceToStorage();
-                     experienceEditingIndex = -1;
-                     renderExperienceItems();
+                    saveExperienceToStorage();
+                    experienceEditingIndex = -1;
+                    renderExperienceItems();
                 });
             }
 
             const btnCancelInlineExperience = document.querySelector('.inline-btn-cancel-experience');
             if (btnCancelInlineExperience) {
-                btnCancelInlineExperience.addEventListener('click', function(e) {
-                     e.preventDefault();
-                     experienceEditingIndex = -1;
-                     renderExperienceItems();
+                btnCancelInlineExperience.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    experienceEditingIndex = -1;
+                    renderExperienceItems();
                 });
             }
         }
@@ -2060,11 +2073,11 @@ document.addEventListener('DOMContentLoaded', () => {
     renderExperienceItems();
 
     if (btnSaveExperienceItem) {
-        btnSaveExperienceItem.addEventListener('click', function(e) {
+        btnSaveExperienceItem.addEventListener('click', function (e) {
             e.preventDefault();
             const titleVal = experienceTitleInput.value.trim();
             const badgeVal = experienceBadgeInput.value.trim();
-            
+
             if (!titleVal || !badgeVal) {
                 alert("Please provide Type and Title.");
                 return;
@@ -2082,10 +2095,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             experienceItems.push(newItem);
             saveExperienceToStorage();
-            
+
             this.innerHTML = '<i class="fas fa-check"></i> Added!';
-            this.style.backgroundColor = '#4cc9f0'; 
-            
+            this.style.backgroundColor = '#4cc9f0';
+
             setTimeout(() => {
                 this.innerHTML = 'Save Experience';
                 this.style.backgroundColor = '';
@@ -2118,58 +2131,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelCertificateItem = document.getElementById('btn-cancel-certificate-item');
 
     const defaultCertificates = [
-        { 
-            name: "Embedded Systems Certification", 
-            issuer: "Coursera", 
-            year: "2023", 
+        {
+            name: "Embedded Systems Certification",
+            issuer: "Coursera",
+            year: "2023",
             icon: "fas fa-award",
             description: "A comprehensive certification covering embedded systems architecture, RTOS, and hardware-software integration.",
             tags: "Embedded Systems, RTOS, C, Architecture"
         },
-        { 
-            name: "Python for Data Science", 
-            issuer: "edX", 
-            year: "2023", 
+        {
+            name: "Python for Data Science",
+            issuer: "edX",
+            year: "2023",
             icon: "fas fa-award",
             description: "Learned data manipulation, visualization, and basic machine learning using Python, Pandas, and Scikit-Learn.",
             tags: "Python, Data Science, Pandas, Visualization"
         },
-        { 
-            name: "Digital Signal Processing", 
-            issuer: "NPTEL", 
-            year: "2022", 
+        {
+            name: "Digital Signal Processing",
+            issuer: "NPTEL",
+            year: "2022",
             icon: "fas fa-award",
             description: "Advanced course on discrete-time signals, filter design, and spectral analysis for electronics engineering.",
             tags: "DSP, Signal Processing, Filters, MATLAB"
         },
-        { 
-            name: "PCB Design Fundamentals", 
-            issuer: "Udemy", 
-            year: "2022", 
+        {
+            name: "PCB Design Fundamentals",
+            issuer: "Udemy",
+            year: "2022",
             icon: "fas fa-award",
             description: "Hands-on training in schematic capture and multi-layer PCB layout design using industry-standard tools.",
             tags: "PCB Design, Altium, Eagle, Hardware"
         },
-        { 
-            name: "Robotics Trainning", 
-            issuer: "JNTUH", 
-            year: "2020", 
+        {
+            name: "Robotics Trainning",
+            issuer: "JNTUH",
+            year: "2020",
             icon: "fas fa-award",
             description: "Participated in a hands-on workshop focusing on Arduino and ARM microcontroller programming and robotic control systems.",
             tags: "Robotics, Arduino, ARM, Control Systems"
         },
-        { 
-            name: "Embedded Systems Design & Programming", 
-            issuer: "NetMax Technology", 
-            year: "2017", 
+        {
+            name: "Embedded Systems Design & Programming",
+            issuer: "NetMax Technology",
+            year: "2017",
             icon: "fas fa-award",
             description: "Industrial training on 8051 and PIC microcontrollers with practical projects on automation.",
             tags: "8051, PIC, Automation, Programming"
         },
-        { 
-            name: "Certified in IMU Section, IT, Transmission & Mobile Project", 
-            issuer: "Nepal Telecom", 
-            year: "2020", 
+        {
+            name: "Certified in IMU Section, IT, Transmission & Mobile Project",
+            issuer: "Nepal Telecom",
+            year: "2020",
             icon: "fas fa-award",
             description: "Technical certification of industrial training at Nepal Telecom, covering transmission systems and mobile projects.",
             tags: "Telecom, Networking, Transmission, Mobile"
@@ -2184,7 +2197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         certificatesItems = defaultCertificates;
         saveCertificatesToStorage();
     }
-    
+
     let certificateEditingIndex = -1;
     let currentCertificateCategory = null;
 
@@ -2227,13 +2240,13 @@ document.addEventListener('DOMContentLoaded', () => {
             certificatesList.innerHTML = gridHTML;
 
             document.querySelectorAll('.btn-open-certificate-category').forEach(card => {
-                card.addEventListener('click', function() {
+                card.addEventListener('click', function () {
                     currentCertificateCategory = this.getAttribute('data-category');
                     renderCertificatesItems();
                 });
             });
 
-            document.getElementById('btn-create-new-certificate-cat').addEventListener('click', function() {
+            document.getElementById('btn-create-new-certificate-cat').addEventListener('click', function () {
                 certificateEditingIndex = -1;
                 certificateIssuerInput.value = '';
                 certificateIconInput.value = 'fas fa-award';
@@ -2241,7 +2254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 certificateYearInput.value = '';
                 certificateDescriptionInput.value = '';
                 certificateTagsInput.value = '';
-                
+
                 certificatesFormTitle.textContent = "Add New Issuer / Certificate";
                 certificatesFormContainer.style.display = 'block';
                 certificatesFormContainer.scrollIntoView({ behavior: 'smooth' });
@@ -2252,7 +2265,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const catItems = certificatesItems
                 .map((item, index) => ({ ...item, originalIndex: index }))
                 .filter(item => item.issuer === currentCertificateCategory);
-                
+
             const catIcon = catItems.length > 0 ? catItems[0].icon : 'fas fa-award';
 
             const headerHTML = `
@@ -2319,13 +2332,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            document.getElementById('btn-back-to-certificate-categories').addEventListener('click', function() {
+            document.getElementById('btn-back-to-certificate-categories').addEventListener('click', function () {
                 currentCertificateCategory = null;
                 certificateEditingIndex = -1;
                 renderCertificatesItems();
             });
 
-            document.getElementById('btn-add-certificate-to-this-cat').addEventListener('click', function() {
+            document.getElementById('btn-add-certificate-to-this-cat').addEventListener('click', function () {
                 certificateEditingIndex = -1;
                 certificateIssuerInput.value = currentCertificateCategory;
                 certificateIconInput.value = catIcon;
@@ -2333,7 +2346,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 certificateYearInput.value = '';
                 certificateDescriptionInput.value = '';
                 certificateTagsInput.value = '';
-                
+
                 certificatesFormTitle.textContent = `Add Certificate to ${currentCertificateCategory}`;
                 certificatesFormContainer.style.display = 'block';
                 certificatesFormContainer.scrollIntoView({ behavior: 'smooth' });
@@ -2341,7 +2354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelectorAll('.btn-edit-certificate').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     certificatesFormContainer.style.display = 'none';
                     certificateEditingIndex = parseInt(this.getAttribute('data-index'));
@@ -2350,7 +2363,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             document.querySelectorAll('.btn-delete-certificate').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     const idx = parseInt(this.getAttribute('data-index'));
                     if (confirm('Are you sure you want to delete this certificate?')) {
@@ -2363,34 +2376,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btnSaveInlineCertificate = document.querySelector('.inline-btn-save-certificate');
             if (btnSaveInlineCertificate) {
-                btnSaveInlineCertificate.addEventListener('click', function(e) {
-                     e.preventDefault();
-                     const nameVal = document.getElementById('inline-cert-name').value.trim();
-                     if (!nameVal) {
-                         alert("Please provide a name.");
-                         return;
-                     }
+                btnSaveInlineCertificate.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const nameVal = document.getElementById('inline-cert-name').value.trim();
+                    if (!nameVal) {
+                        alert("Please provide a name.");
+                        return;
+                    }
 
-                     certificatesItems[certificateEditingIndex] = {
-                         ...certificatesItems[certificateEditingIndex],
-                         name: nameVal,
-                         year: document.getElementById('inline-cert-year').value.trim(),
-                         description: document.getElementById('inline-cert-desc').value.trim(),
-                         tags: document.getElementById('inline-cert-tags').value.trim()
-                     };
+                    certificatesItems[certificateEditingIndex] = {
+                        ...certificatesItems[certificateEditingIndex],
+                        name: nameVal,
+                        year: document.getElementById('inline-cert-year').value.trim(),
+                        description: document.getElementById('inline-cert-desc').value.trim(),
+                        tags: document.getElementById('inline-cert-tags').value.trim()
+                    };
 
-                     saveCertificatesToStorage();
-                     certificateEditingIndex = -1;
-                     renderCertificatesItems();
+                    saveCertificatesToStorage();
+                    certificateEditingIndex = -1;
+                    renderCertificatesItems();
                 });
             }
 
             const btnCancelInlineCertificate = document.querySelector('.inline-btn-cancel-certificate');
             if (btnCancelInlineCertificate) {
-                btnCancelInlineCertificate.addEventListener('click', function(e) {
-                     e.preventDefault();
-                     certificateEditingIndex = -1;
-                     renderCertificatesItems();
+                btnCancelInlineCertificate.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    certificateEditingIndex = -1;
+                    renderCertificatesItems();
                 });
             }
         }
@@ -2399,11 +2412,11 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCertificatesItems();
 
     if (btnSaveCertificateItem) {
-        btnSaveCertificateItem.addEventListener('click', function(e) {
+        btnSaveCertificateItem.addEventListener('click', function (e) {
             e.preventDefault();
             const nameVal = certificateNameInput.value.trim();
             const issuerVal = certificateIssuerInput.value.trim();
-            
+
             if (!nameVal || !issuerVal) {
                 alert("Please provide Issuer and Certificate Name.");
                 return;
@@ -2420,10 +2433,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             certificatesItems.push(newItem);
             saveCertificatesToStorage();
-            
+
             this.innerHTML = '<i class="fas fa-check"></i> Added!';
-            this.style.backgroundColor = '#4cc9f0'; 
-            
+            this.style.backgroundColor = '#4cc9f0';
+
             setTimeout(() => {
                 this.innerHTML = 'Save Certificate';
                 this.style.backgroundColor = '';
@@ -2458,9 +2471,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadContactData();
 
     if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
+        contactForm.addEventListener('submit', function (e) {
             e.preventDefault();
             const saveBtn = this.querySelector('.btn-save');
+
+            // Guard against multiple clicks during animation
+            if (saveBtn.innerHTML.includes('Saving') || saveBtn.innerHTML.includes('Saved')) return;
+
             const originalText = saveBtn.innerHTML;
 
             // Visual feedback
@@ -2475,7 +2492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
                 saveBtn.style.backgroundColor = '#4cc9f0';
-                
+
                 setTimeout(() => {
                     saveBtn.innerHTML = originalText;
                     saveBtn.style.backgroundColor = '';
