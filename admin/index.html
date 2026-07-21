@@ -57,6 +57,8 @@
                 <li data-tab="tab-projects"><i class="fas fa-project-diagram"></i> Projects</li>
                 <li data-tab="tab-experience"><i class="fas fa-briefcase"></i> Experience</li>
                 <li data-tab="tab-certificates"><i class="fas fa-award"></i> Certificates</li>
+                <li data-tab="tab-blog"><i class="fas fa-blog"></i> Blog</li>
+                <li data-tab="tab-learning"><i class="fas fa-book-open"></i> Learning</li>
             </ul>
             <div class="sidebar-footer">
                 <button id="logout-btn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -516,6 +518,61 @@
                     <div class="list-container" id="certificates-list">
                         <!-- Certificates items will be loaded here dynamically -->
                     </div>
+                </div>
+
+                <!-- Blog Tab -->
+                <div id="tab-blog" class="tab-pane">
+                    <div class="tab-header">
+                        <h3>Manage Blog Posts</h3>
+                        <button type="button" id="btn-add-blog-post" class="btn-save" style="width:auto;"><i class="fas fa-plus"></i> Add New Post</button>
+                    </div>
+
+                    <div id="blog-form-container"
+                        style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+                        <h4 style="margin-bottom: 15px;" id="blog-form-title">Add New Blog Post</h4>
+                        <form class="admin-form" style="padding: 0; box-shadow: none; background: transparent; max-width: 100%;">
+                            <input type="hidden" id="blog-item-index" value="-1">
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" id="blog-title-input" placeholder="e.g. Getting Started with ESP32">
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" id="blog-category-input" placeholder="e.g. Embedded Systems">
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="text" id="blog-date-input" placeholder="e.g. July 2026">
+                            </div>
+                            <div class="form-group">
+                                <label>Cover Image URL</label>
+                                <input type="text" id="blog-image-input" placeholder="https://... (optional)">
+                            </div>
+                            <div class="form-group">
+                                <label>Excerpt (short summary shown on card)</label>
+                                <textarea id="blog-excerpt-input" rows="2" placeholder="Short summary..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Full Content</label>
+                                <textarea id="blog-content-input" rows="8" placeholder="Write your blog post here..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Tags (comma separated)</label>
+                                <input type="text" id="blog-tags-input" placeholder="e.g. IoT, Tutorial, ESP32">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" id="btn-save-blog-item" class="btn-save">Save Post</button>
+                                <button type="button" id="btn-cancel-blog-item" class="btn-logout" style="width: auto; padding: 12px 25px;">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="list-container" id="blog-list"></div>
+                </div>
+
+                <!-- Learning Tab -->
+                <div id="tab-learning" class="tab-pane">
+                    <div id="learning-list"></div>
                 </div>
 
                 <!-- Contact Update Section -->
