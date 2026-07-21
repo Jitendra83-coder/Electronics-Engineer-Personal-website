@@ -2502,4 +2502,102 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ===== BACKUP & RESTORE =====
+    const btnBackupDownload = document.getElementById('btn-backup-download');
+    const btnBackupRestoreTrigger = document.getElementById('btn-backup-restore-trigger');
+    const backupRestoreInput = document.getElementById('backup-restore-input');
+    const backupStatusMsg = document.getElementById('backup-status-msg');
+
+    // All keys this admin panel stores in localStorage
+    const BACKUP_KEYS = [
+        'adminDisplayName', 'adminEmail', 'adminProfilePic',
+        'heroName', 'heroTitle', 'heroTagline',
+        'aboutParagraphs', 'aboutObjectives', 'aboutObjective',
+        'educationItems', 'skillsItems', 'projectsItems',
+        'experienceItems', 'certificatesItems',
+        'contactEmail', 'contactPhone', 'contactLocation'
+    ];
+
+    function showBackupStatus(message, isError) {
+        if (!backupStatusMsg) return;
+        backupStatusMsg.textContent = message;
+        backupStatusMsg.style.color = isError ? '#e63946' : '#2a9d8f';
+        backupStatusMsg.style.display = 'block';
+        setTimeout(() => { backupStatusMsg.style.display = 'none'; }, 4000);
+    }
+
+    if (btnBackupDownload) {
+        btnBackupDownload.addEventListener('click', () => {
+            const backupData = {};
+            BACKUP_KEYS.forEach(key => {
+                const val = localStorage.getItem(key);
+                if (val !== null) backupData[key] = val;
+            });
+
+            const payload = {
+                _meta: {
+                    source: 'Jitendra Sharma Portfolio Admin Panel',
+                    exportedAt: new Date().toISOString()
+                },
+                data: backupData
+            };
+
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const dateStr = new Date().toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `portfolio-backup-${dateStr}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showBackupStatus('Backup downloaded successfully!', false);
+        });
+    }
+
+    if (btnBackupRestoreTrigger && backupRestoreInput) {
+        btnBackupRestoreTrigger.addEventListener('click', () => {
+            backupRestoreInput.value = '';
+            backupRestoreInput.click();
+        });
+
+        backupRestoreInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const parsed = JSON.parse(event.target.result);
+                    const restoredData = parsed.data || parsed; // support raw or wrapped format
+
+                    if (!confirm('Yo le hal ko admin panel ko data lai backup file ko data le overwrite garcha. Continue garne?')) {
+                        return;
+                    }
+
+                    let restoredCount = 0;
+                    BACKUP_KEYS.forEach(key => {
+                        if (Object.prototype.hasOwnProperty.call(restoredData, key)) {
+                            localStorage.setItem(key, restoredData[key]);
+                            restoredCount++;
+                        }
+                    });
+
+                    if (restoredCount === 0) {
+                        showBackupStatus('Yo file ma valid backup data phelaiena.', true);
+                        return;
+                    }
+
+                    showBackupStatus(`Restored ${restoredCount} items! Reloading...`, false);
+                    setTimeout(() => window.location.reload(), 1200);
+                } catch (err) {
+                    showBackupStatus('Invalid backup file. JSON parse garna sakiena.', true);
+                }
+            };
+            reader.readAsText(file);
+        });
+    }
+
 });
