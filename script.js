@@ -38,21 +38,95 @@ document.addEventListener('click', (e) => {
 });
 
 // ===================================
-// Smooth Scrolling
+// Smooth Scrolling & Full-Page Sections (Blog / Learning)
 // ===================================
+// Home, About, Skills, Projects, Experience, Certificates & Contact stay on
+// one long scrolling page. Blog & Learning open as a separate "page" that
+// hides the rest of the content, similar to a normal sub-page.
+const pageModeSections = ['blog', 'learning'];
+
+function enterPageMode(sectionId) {
+    document.body.classList.add('page-mode');
+    document.querySelectorAll('section[id]').forEach(sec => {
+        sec.classList.toggle('active-page', sec.id === sectionId);
+    });
+    navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${sectionId}`);
+    });
+    window.scrollTo(0, 0);
+    if (location.hash !== `#${sectionId}`) {
+        history.pushState({ page: sectionId }, '', `#${sectionId}`);
+    }
+}
+
+function exitPageMode(scrollToId) {
+    document.body.classList.remove('page-mode');
+    document.querySelectorAll('section[id]').forEach(sec => sec.classList.remove('active-page'));
+    const target = scrollToId ? document.getElementById(scrollToId) : null;
+    if (target) {
+        requestAnimationFrame(() => {
+            window.scrollTo({ top: target.offsetTop - 70, behavior: 'auto' });
+        });
+    }
+}
+
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        
-        if (target) {
-            const offsetTop = target.offsetTop - 70;
-            window.scrollTo({
-                top: offsetTop,
-                behavior: 'smooth'
-            });
+        const hash = this.getAttribute('href');
+        const targetId = hash.slice(1);
+        const target = document.querySelector(hash);
+
+        if (!target) return;
+
+        // Blog / Learning: open as a dedicated page, hiding everything else
+        if (pageModeSections.includes(targetId)) {
+            enterPageMode(targetId);
+            return;
         }
+
+        // Any other link: if we're currently inside a full-page section,
+        // leave that mode first, then scroll normally.
+        if (document.body.classList.contains('page-mode')) {
+            if (location.hash !== hash) {
+                history.pushState({ page: targetId }, '', hash);
+            }
+            exitPageMode(targetId);
+            return;
+        }
+
+        const offsetTop = target.offsetTop - 70;
+        window.scrollTo({
+            top: offsetTop,
+            behavior: 'smooth'
+        });
     });
+});
+
+// "Back to Home" buttons placed inside the Blog / Learning pages
+document.querySelectorAll('.page-back-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        history.pushState({ page: 'home' }, '', '#home');
+        exitPageMode('home');
+    });
+});
+
+// Support browser Back/Forward buttons while switching in/out of page mode
+window.addEventListener('popstate', () => {
+    const hash = location.hash.replace('#', '');
+    if (pageModeSections.includes(hash)) {
+        enterPageMode(hash);
+    } else {
+        exitPageMode(hash || 'home');
+    }
+});
+
+// If the page is loaded/refreshed directly on #blog or #learning, open that page view
+window.addEventListener('load', () => {
+    const hash = location.hash.replace('#', '');
+    if (pageModeSections.includes(hash)) {
+        enterPageMode(hash);
+    }
 });
 
 // ===================================
@@ -61,6 +135,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const sections = document.querySelectorAll('section[id]');
 
 function updateActiveNavLink() {
+    if (document.body.classList.contains('page-mode')) return;
     const scrollY = window.pageYOffset;
     
     sections.forEach(section => {
@@ -889,6 +964,316 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error('Error rendering blog:', e);
         }
+    }
+
+    // --- SEED DEFAULT C / C++ COURSES (only the first time, so it never
+    //     overwrites courses you add or delete later from the admin panel) ---
+    if (localStorage.getItem('learningCourses') === null) {
+        const defaultLearningCourses = [
+            {
+                title: 'C Programming',
+                description: 'Core concepts of C with practice MCQs for quick revision and exam prep.',
+                icon: 'fas fa-code',
+                modules: [
+                    {
+                        title: 'Introduction & Basics',
+                        notes: 'C is a procedural, general-purpose programming language created by Dennis Ritchie in 1972 at Bell Labs. Every C program has a mandatory entry-point function called main(), and every statement ends with a semicolon.',
+                        questions: [
+                            {
+                                question: 'Who developed the C programming language?',
+                                options: ['Dennis Ritchie', 'James Gosling', 'Bjarne Stroustrup', 'Guido van Rossum'],
+                                correctIndex: 0,
+                                explanation: 'C was created by Dennis Ritchie at Bell Labs in 1972.'
+                            },
+                            {
+                                question: 'Which function is the entry point of a C program?',
+                                options: ['start()', 'main()', 'begin()', 'init()'],
+                                correctIndex: 1,
+                                explanation: 'Execution of every C program begins from the main() function.'
+                            },
+                            {
+                                question: 'Which symbol is used to terminate a statement in C?',
+                                options: [', (comma)', ': (colon)', '; (semicolon)', '. (period)'],
+                                correctIndex: 2,
+                                explanation: 'A semicolon marks the end of a statement in C.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Data Types & Variables',
+                        notes: 'C provides basic data types such as int, float, double and char, along with qualifiers like const and storage sizes that depend on the system/compiler.',
+                        questions: [
+                            {
+                                question: "What is the size of an 'int' on most modern 32/64-bit systems?",
+                                options: ['2 bytes', '4 bytes', '8 bytes', '1 byte'],
+                                correctIndex: 1,
+                                explanation: 'On most modern systems an int occupies 4 bytes, though this is compiler/platform dependent.'
+                            },
+                            {
+                                question: 'Which keyword is used to define a constant in C?',
+                                options: ['const', 'final', 'static', 'constant'],
+                                correctIndex: 0,
+                                explanation: "The 'const' qualifier makes a variable's value unmodifiable after initialization."
+                            },
+                            {
+                                question: 'Which format specifier is used to print a float value with printf()?',
+                                options: ['%d', '%f', '%c', '%s'],
+                                correctIndex: 1,
+                                explanation: "'%f' is the format specifier for floating point values."
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Control Structures',
+                        notes: 'C supports decision-making with if/else and switch, and looping with for, while and do-while, plus break/continue to alter loop flow.',
+                        questions: [
+                            {
+                                question: 'Which loop is guaranteed to execute at least once?',
+                                options: ['for', 'while', 'do-while', 'if'],
+                                correctIndex: 2,
+                                explanation: 'A do-while loop checks its condition after the loop body runs, so it always executes at least once.'
+                            },
+                            {
+                                question: 'Which statement immediately exits the nearest enclosing loop?',
+                                options: ['continue', 'break', 'return', 'exit'],
+                                correctIndex: 1,
+                                explanation: "'break' terminates the loop it is placed in immediately."
+                            },
+                            {
+                                question: "What does a 'switch' statement compare its expression against?",
+                                options: ['Ranges of values', 'Boolean expressions', 'Discrete constant values/labels', 'Pointers only'],
+                                correctIndex: 2,
+                                explanation: 'switch-case matches an expression against discrete constant case labels.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Functions & Storage Classes',
+                        notes: 'Functions let you organize reusable blocks of code. Storage classes (auto, static, extern, register) control a variable\'s scope, lifetime and default value.',
+                        questions: [
+                            {
+                                question: "Which storage class retains a variable's value between function calls?",
+                                options: ['auto', 'static', 'register', 'extern'],
+                                correctIndex: 1,
+                                explanation: 'A static local variable keeps its value between successive calls to the function.'
+                            },
+                            {
+                                question: 'What is recursion?',
+                                options: ['A loop inside a loop', 'A function calling itself', 'A pointer to a function', 'A type of array'],
+                                correctIndex: 1,
+                                explanation: 'Recursion occurs when a function calls itself, directly or indirectly, to solve a smaller sub-problem.'
+                            },
+                            {
+                                question: 'Which keyword is used to access a variable defined in another file?',
+                                options: ['static', 'extern', 'auto', 'register'],
+                                correctIndex: 1,
+                                explanation: "'extern' declares a variable that is defined elsewhere, often in another source file."
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Arrays, Strings & Pointers',
+                        notes: 'Arrays store fixed-size sequential collections of elements. Strings in C are arrays of characters terminated by \\0. Pointers hold memory addresses of variables.',
+                        questions: [
+                            {
+                                question: "What does the pointer expression '*p' represent?",
+                                options: ['The address of p', 'The value stored at the address p points to', 'A new pointer', 'A string'],
+                                correctIndex: 1,
+                                explanation: "The dereference operator '*' accesses the value stored at the address a pointer holds."
+                            },
+                            {
+                                question: 'Which function is used to find the length of a string in C?',
+                                options: ['strlen()', 'length()', 'size()', 'strcount()'],
+                                correctIndex: 0,
+                                explanation: "strlen() returns the number of characters in a string, excluding the null terminator."
+                            },
+                            {
+                                question: 'Array indices in C start from which number?',
+                                options: ['1', '0', '-1', 'Depends on the compiler'],
+                                correctIndex: 1,
+                                explanation: 'C arrays are zero-indexed, so the first element is at index 0.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Structures & File Handling',
+                        notes: 'Structures (struct) group related variables of different types under one name. The stdio.h library provides functions like fopen(), fread()/fwrite() and fclose() for file I/O.',
+                        questions: [
+                            {
+                                question: 'Which keyword defines a user-defined data type grouping variables of different types?',
+                                options: ['array', 'struct', 'union', 'class'],
+                                correctIndex: 1,
+                                explanation: "'struct' is used to group related variables (possibly of different types) under one name."
+                            },
+                            {
+                                question: 'Which function is used to open a file in C?',
+                                options: ['open()', 'fopen()', 'fileopen()', 'openFile()'],
+                                correctIndex: 1,
+                                explanation: 'fopen() opens a file and returns a FILE pointer used for subsequent operations.'
+                            },
+                            {
+                                question: 'Which file mode opens a file for appending data without deleting existing content?',
+                                options: ['"r"', '"w"', '"a"', '"x"'],
+                                correctIndex: 2,
+                                explanation: '"a" mode opens (or creates) a file and writes are added to the end, preserving existing content.'
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                title: 'C++ Programming',
+                description: 'Object-oriented programming in C++ with MCQs covering classes, inheritance, polymorphism, STL and more.',
+                icon: 'fas fa-laptop-code',
+                modules: [
+                    {
+                        title: 'OOP Basics',
+                        notes: 'C++ extends C with object-oriented features built on four pillars: encapsulation, abstraction, inheritance and polymorphism, organized around classes and objects.',
+                        questions: [
+                            {
+                                question: 'Which of the following is NOT one of the four pillars of OOP?',
+                                options: ['Encapsulation', 'Polymorphism', 'Compilation', 'Inheritance'],
+                                correctIndex: 2,
+                                explanation: 'Compilation is a build step, not an OOP principle. The four pillars are encapsulation, abstraction, inheritance and polymorphism.'
+                            },
+                            {
+                                question: 'Which keyword is used to define a class in C++?',
+                                options: ['struct', 'class', 'object', 'define'],
+                                correctIndex: 1,
+                                explanation: "The 'class' keyword defines a new class in C++ (struct can also define one, but with public members by default)."
+                            },
+                            {
+                                question: 'What is an object in OOP terms?',
+                                options: ['A blueprint for data', 'An instance of a class', 'A type of function', 'A loop construct'],
+                                correctIndex: 1,
+                                explanation: 'An object is a concrete instance created from a class, which acts as its blueprint.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Constructors & Destructors',
+                        notes: 'Constructors initialize objects automatically when created; destructors clean up resources when an object goes out of scope. Both can be customized and, in the case of constructors, overloaded.',
+                        questions: [
+                            {
+                                question: 'Which constructor is called automatically when an object is created without arguments?',
+                                options: ['Default constructor', 'Copy constructor', 'Destructor', 'Static constructor'],
+                                correctIndex: 0,
+                                explanation: 'The default constructor runs automatically whenever an object is created with no explicit arguments.'
+                            },
+                            {
+                                question: "What symbol precedes a destructor's name in C++?",
+                                options: ['&', '*', '~', '#'],
+                                correctIndex: 2,
+                                explanation: "A destructor's name is the class name prefixed with a tilde ('~')."
+                            },
+                            {
+                                question: 'Can constructors be overloaded in C++?',
+                                options: ['No, never', 'Yes, based on differing parameter lists', 'Only in derived classes', 'Only when using templates'],
+                                correctIndex: 1,
+                                explanation: 'C++ allows multiple constructors with different parameter lists, just like normal function overloading.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Inheritance',
+                        notes: 'Inheritance lets a class (derived) acquire properties and behavior from another class (base), enabling code reuse. C++ supports single, multiple, multilevel, hierarchical and hybrid inheritance.',
+                        questions: [
+                            {
+                                question: 'Which type of inheritance involves exactly one base class and one derived class?',
+                                options: ['Multiple inheritance', 'Single inheritance', 'Hierarchical inheritance', 'Hybrid inheritance'],
+                                correctIndex: 1,
+                                explanation: 'Single inheritance means one derived class inherits from just one base class.'
+                            },
+                            {
+                                question: 'Which access specifier restricts members to be accessible only within the same class?',
+                                options: ['public', 'protected', 'private', 'friend'],
+                                correctIndex: 2,
+                                explanation: "'private' members are accessible only inside the class that declares them (not even derived classes)."
+                            },
+                            {
+                                question: 'How is a class inherited from a base class in C++ syntax?',
+                                options: ["Using the 'implements' keyword", "A colon (:) followed by the base class name", "Using the 'extends' keyword", "Using #include"],
+                                correctIndex: 1,
+                                explanation: "C++ uses 'class Derived : access-specifier Base { ... }' syntax to inherit from a base class."
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Polymorphism',
+                        notes: 'Polymorphism allows the same interface to behave differently. Compile-time polymorphism is achieved via function/operator overloading; runtime polymorphism uses virtual functions and inheritance.',
+                        questions: [
+                            {
+                                question: 'Function overloading is an example of which kind of polymorphism?',
+                                options: ['Runtime polymorphism', 'Compile-time polymorphism', 'Dynamic binding', 'Encapsulation'],
+                                correctIndex: 1,
+                                explanation: 'Overload resolution happens at compile time, making function overloading a form of compile-time (static) polymorphism.'
+                            },
+                            {
+                                question: 'Which keyword enables runtime polymorphism through function overriding?',
+                                options: ['static', 'virtual', 'const', 'inline'],
+                                correctIndex: 1,
+                                explanation: "Declaring a base class function as 'virtual' allows derived classes to override it, enabling runtime (dynamic) polymorphism."
+                            },
+                            {
+                                question: 'What does operator overloading allow you to do?',
+                                options: ['Redefine how operators work for user-defined types', 'Overload loops', 'Only overload functions, not operators', 'It is not possible in C++'],
+                                correctIndex: 0,
+                                explanation: 'Operator overloading lets you define custom behavior for operators (like +, ==) when used with user-defined types/classes.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'STL & Templates',
+                        notes: 'The Standard Template Library (STL) provides ready-made containers (vector, set, map...), algorithms and iterators. Templates let you write generic, type-independent functions and classes.',
+                        questions: [
+                            {
+                                question: 'What does STL stand for?',
+                                options: ['Standard Template Library', 'Structured Type Language', 'System Type Library', 'Static Template Layer'],
+                                correctIndex: 0,
+                                explanation: 'STL stands for Standard Template Library, part of the C++ standard library.'
+                            },
+                            {
+                                question: 'Which STL container stores unique elements in sorted order?',
+                                options: ['vector', 'set', 'list', 'queue'],
+                                correctIndex: 1,
+                                explanation: 'std::set stores unique elements automatically kept in sorted order.'
+                            },
+                            {
+                                question: 'What is the main advantage of using templates in C++?',
+                                options: ['Faster compilation always', 'Writing generic, type-independent code', 'Smaller executable size always', 'Automatic memory management'],
+                                correctIndex: 1,
+                                explanation: 'Templates let the same function/class work with any data type, avoiding duplicated type-specific code.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Exception Handling',
+                        notes: 'C++ handles runtime errors using try, throw and catch blocks, allowing a program to respond to exceptional situations without crashing abruptly.',
+                        questions: [
+                            {
+                                question: 'Which block is used to catch exceptions thrown in a try block?',
+                                options: ['try', 'catch', 'throw', 'handle'],
+                                correctIndex: 1,
+                                explanation: "A 'catch' block follows a 'try' block and handles exceptions of a matching type."
+                            },
+                            {
+                                question: 'Which keyword is used to raise/signal an exception in C++?',
+                                options: ['raise', 'throw', 'catch', 'error'],
+                                correctIndex: 1,
+                                explanation: "The 'throw' keyword signals that an exceptional condition has occurred."
+                            },
+                            {
+                                question: 'What happens if an exception is thrown but never caught?',
+                                options: ['The program continues normally', "std::terminate() is called and the program aborts", 'It is silently ignored', 'A compiler error occurs'],
+                                correctIndex: 1,
+                                explanation: 'An uncaught exception calls std::terminate(), which by default aborts the program.'
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+        localStorage.setItem('learningCourses', JSON.stringify(defaultLearningCourses));
     }
 
     // --- RENDER LEARNING (COURSES/MODULES/MCQ) FROM LOCALSTORAGE ---
