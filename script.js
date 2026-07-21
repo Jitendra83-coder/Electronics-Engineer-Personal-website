@@ -836,4 +836,161 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error rendering certifications:', e);
         }
     }
+
+    // --- RENDER BLOG FROM LOCALSTORAGE ---
+    const blogGrid = document.querySelector('.blog-grid');
+    if (blogGrid) {
+        try {
+            const storedBlog = localStorage.getItem('blogItems');
+            if (storedBlog) {
+                const blogItems = JSON.parse(storedBlog);
+                if (blogItems.length > 0) {
+                    blogGrid.innerHTML = '';
+                    blogItems.forEach((post, idx) => {
+                        const tagsHTML = (post.tags || '')
+                            .split(',')
+                            .filter(t => t.trim())
+                            .map(tag => `<span class="skill-tag">${tag.trim()}</span>`)
+                            .join('');
+
+                        const card = document.createElement('div');
+                        card.className = 'blog-card';
+                        card.style.cssText = 'background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.08); display:flex; flex-direction:column;';
+                        card.innerHTML = `
+                            ${post.image ? `<img src="${post.image}" alt="${post.title}" style="width:100%; height:180px; object-fit:cover;">` : ''}
+                            <div style="padding:20px; flex:1; display:flex; flex-direction:column;">
+                                <div style="font-size:0.8rem; color:#888; margin-bottom:8px;">${post.category || ''} ${post.date ? '&middot; ' + post.date : ''}</div>
+                                <h3 style="margin:0 0 10px; font-size:1.15rem;">${post.title}</h3>
+                                <p style="color:#666; font-size:0.9rem; flex:1;">${post.excerpt || ''}</p>
+                                ${tagsHTML ? `<div class="skills-tags" style="margin:12px 0;">${tagsHTML}</div>` : ''}
+                                <button class="btn-read-more" data-index="${idx}" style="margin-top:10px; padding:10px 18px; border:none; border-radius:6px; background:var(--primary-color, #4361ee); color:#fff; cursor:pointer; align-self:flex-start;">Read More</button>
+                                <div class="blog-full-content" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #eee; white-space:pre-wrap; color:#444; font-size:0.9rem;"></div>
+                            </div>
+                        `;
+                        blogGrid.appendChild(card);
+                    });
+
+                    blogGrid.querySelectorAll('.btn-read-more').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const idx = parseInt(this.getAttribute('data-index'));
+                            const contentDiv = this.nextElementSibling;
+                            if (contentDiv.style.display === 'none') {
+                                contentDiv.textContent = blogItems[idx].content || '';
+                                contentDiv.style.display = 'block';
+                                this.textContent = 'Show Less';
+                            } else {
+                                contentDiv.style.display = 'none';
+                                this.textContent = 'Read More';
+                            }
+                        });
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Error rendering blog:', e);
+        }
+    }
+
+    // --- RENDER LEARNING (COURSES/MODULES/MCQ) FROM LOCALSTORAGE ---
+    const learningContainer = document.querySelector('.learning-courses');
+    if (learningContainer) {
+        try {
+            const storedLearning = localStorage.getItem('learningCourses');
+            if (storedLearning) {
+                const courses = JSON.parse(storedLearning);
+                if (courses.length > 0) {
+                    learningContainer.innerHTML = '';
+                    courses.forEach((course, cIdx) => {
+                        const courseCard = document.createElement('div');
+                        courseCard.style.cssText = 'background:#fff; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08); margin-bottom:20px; overflow:hidden;';
+
+                        const modulesHTML = (course.modules || []).map((mod, mIdx) => {
+                            const questionsHTML = (mod.questions || []).map((q, qIdx) => {
+                                const optsHTML = (q.options || []).map((opt, oIdx) => `
+                                    <label style="display:block; padding:8px 12px; margin:5px 0; border:1px solid #e0e0e0; border-radius:6px; cursor:pointer;">
+                                        <input type="radio" name="c${cIdx}-m${mIdx}-q${qIdx}" value="${oIdx}" style="margin-right:8px;"> ${opt}
+                                    </label>
+                                `).join('');
+                                return `
+                                    <div class="mcq-block" style="margin:15px 0; padding:15px; background:#f8f9fa; border-radius:8px;" data-correct="${q.correctIndex}">
+                                        <p style="font-weight:600; margin-bottom:8px;">${qIdx + 1}. ${q.question}</p>
+                                        ${optsHTML}
+                                        <button class="btn-check-answer" style="margin-top:8px; padding:6px 14px; border:none; border-radius:6px; background:#4361ee; color:#fff; cursor:pointer; font-size:0.85rem;">Check Answer</button>
+                                        <p class="mcq-result" style="margin-top:8px; font-size:0.85rem; display:none;"></p>
+                                        ${q.explanation ? `<p class="mcq-explanation" style="margin-top:5px; font-size:0.8rem; color:#777; display:none;">${q.explanation}</p>` : ''}
+                                    </div>
+                                `;
+                            }).join('');
+
+                            return `
+                                <div class="learning-module" style="border-top:1px solid #eee;">
+                                    <div class="module-header" style="padding:15px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                                        <strong>${mod.title}</strong>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="module-body" style="display:none; padding:0 20px 20px;">
+                                        ${mod.notes ? `<p style="white-space:pre-wrap; color:#555; margin-bottom:15px;">${mod.notes}</p>` : ''}
+                                        ${questionsHTML}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+
+                        courseCard.innerHTML = `
+                            <div class="course-header" style="padding:20px; background:#f8f9fa; display:flex; align-items:center; gap:15px; cursor:pointer;">
+                                <i class="${course.icon || 'fas fa-book'}" style="font-size:1.4rem; color:#4361ee;"></i>
+                                <div>
+                                    <h3 style="margin:0;">${course.title}</h3>
+                                    <p style="margin:5px 0 0; color:#777; font-size:0.9rem;">${course.description || ''}</p>
+                                </div>
+                            </div>
+                            <div class="course-body" style="display:none;">
+                                ${modulesHTML || '<p style="padding:20px; color:#999;">No modules yet.</p>'}
+                            </div>
+                        `;
+                        learningContainer.appendChild(courseCard);
+                    });
+
+                    // Toggle course body
+                    learningContainer.querySelectorAll('.course-header').forEach(header => {
+                        header.addEventListener('click', () => {
+                            const body = header.nextElementSibling;
+                            body.style.display = body.style.display === 'none' ? 'block' : 'none';
+                        });
+                    });
+                    // Toggle module body
+                    learningContainer.querySelectorAll('.module-header').forEach(header => {
+                        header.addEventListener('click', () => {
+                            const body = header.nextElementSibling;
+                            body.style.display = body.style.display === 'none' ? 'block' : 'none';
+                        });
+                    });
+                    // Check answer buttons
+                    learningContainer.querySelectorAll('.btn-check-answer').forEach(btn => {
+                        btn.addEventListener('click', function () {
+                            const block = this.closest('.mcq-block');
+                            const correctIdx = parseInt(block.getAttribute('data-correct'));
+                            const selected = block.querySelector('input[type="radio"]:checked');
+                            const resultP = block.querySelector('.mcq-result');
+                            const explanationP = block.querySelector('.mcq-explanation');
+
+                            if (!selected) {
+                                resultP.textContent = 'Please select an answer first.';
+                                resultP.style.color = '#e63946';
+                                resultP.style.display = 'block';
+                                return;
+                            }
+                            const isCorrect = parseInt(selected.value) === correctIdx;
+                            resultP.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect. Try again!';
+                            resultP.style.color = isCorrect ? '#2a9d8f' : '#e63946';
+                            resultP.style.display = 'block';
+                            if (explanationP) explanationP.style.display = 'block';
+                        });
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('Error rendering learning courses:', e);
+        }
+    }
 });
