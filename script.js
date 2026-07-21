@@ -714,6 +714,59 @@ document.addEventListener('DOMContentLoaded', () => {
             if (storedExp) {
                 const experience = JSON.parse(storedExp);
                 if (experience.length > 0) {
+
+                    // ----- Date-wise sorting helpers (latest first) -----
+                    const EXPERIENCE_MONTHS = {
+                        january: 0, jan: 0, february: 1, feb: 1, march: 2, mar: 2, april: 3, apr: 3,
+                        may: 4, june: 5, jun: 5, july: 6, jul: 6, august: 7, aug: 7,
+                        september: 8, sep: 8, sept: 8, october: 9, oct: 9,
+                        november: 10, nov: 10, december: 11, dec: 11
+                    };
+
+                    function parseExperienceDate(str) {
+                        if (!str) return null;
+                        const s = str.trim().toLowerCase();
+
+                        const yearMatch = s.match(/\b(19|20)\d{2}\b/);
+                        if (!yearMatch) return null;
+                        const year = parseInt(yearMatch[0], 10);
+
+                        let month = 0;
+                        for (const key in EXPERIENCE_MONTHS) {
+                            if (s.includes(key)) { month = EXPERIENCE_MONTHS[key]; break; }
+                        }
+
+                        let day = 1;
+                        const dayMatch = s.match(/\b([1-9]|[12]\d|3[01])(?:st|nd|rd|th)?\b/);
+                        if (dayMatch) {
+                            const d = parseInt(dayMatch[1], 10);
+                            if (d >= 1 && d <= 31) day = d;
+                        }
+
+                        return new Date(year, month, day);
+                    }
+
+                    function getExperienceSortValue(item) {
+                        const duration = (item.duration || '').trim();
+                        if (!duration) return -Infinity;
+
+                        const lower = duration.toLowerCase();
+                        if (/till date|present|current|ongoing|now\b/.test(lower)) {
+                            return Infinity;
+                        }
+
+                        const parts = duration.split(/\s*(?:-|–|—|\bto\b)\s*/i).map(p => p.trim()).filter(Boolean);
+                        const endPart = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+
+                        if (/till date|present|current|ongoing/i.test(endPart)) return Infinity;
+
+                        const endDate = parseExperienceDate(endPart) || parseExperienceDate(duration);
+                        return endDate ? endDate.getTime() : -Infinity;
+                    }
+
+                    experience.sort((a, b) => getExperienceSortValue(b) - getExperienceSortValue(a));
+                    // ----- end sorting helpers -----
+
                     timeline.innerHTML = '';
                     experience.forEach(item => {
                         const timelineItem = document.createElement('div');
