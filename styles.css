@@ -380,11 +380,18 @@ section {
    Blog & Learning instead open like a separate page that hides
    the rest of the content.
    =================================== */
-body.page-mode section[id] {
+body.page-mode section[id]:not(.page-section) {
     display: none;
 }
 
-body.page-mode section[id].active-page {
+/* Blog & Learning are "page-sections": they never appear while scrolling
+   the normal homepage. They only become visible when opened from the nav
+   (via the .active-page class added by script.js). */
+.page-section {
+    display: none;
+}
+
+.page-section.active-page {
     display: block;
     min-height: 100vh;
     padding-top: 7rem;
