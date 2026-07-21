@@ -128,6 +128,17 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="backup-section" style="margin-top: 30px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+                        <h3 style="margin-top:0;">Backup &amp; Restore</h3>
+                        <p style="color:#666; font-size: 0.9rem;">Data browser ko localStorage ma save huncha, jasले cache clear garda, arko browser/device kholda, ya browser le storage clear garda harauna sakcha. Update garepachi ya niyamit rupma yaha bata backup file download gari rakhnu hos. Data haraye pani, restore garna backup file upload garnu matra parcha.</p>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:15px;">
+                            <button type="button" id="btn-backup-download" class="btn-save" style="width:auto;"><i class="fas fa-download"></i> Download Backup (JSON)</button>
+                            <button type="button" id="btn-backup-restore-trigger" class="btn-logout" style="width:auto;"><i class="fas fa-upload"></i> Restore from Backup</button>
+                            <input type="file" id="backup-restore-input" accept="application/json" style="display:none;">
+                        </div>
+                        <p id="backup-status-msg" style="margin-top:10px; font-size:0.85rem; display:none;"></p>
+                    </div>
                 </div>
 
                 <!-- Hero Section Tab -->
