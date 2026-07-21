@@ -2512,6 +2512,473 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ===== BLOG MANAGEMENT =====
+    const blogList = document.getElementById('blog-list');
+    const blogFormContainer = document.getElementById('blog-form-container');
+    const blogFormTitle = document.getElementById('blog-form-title');
+    const blogItemIndex = document.getElementById('blog-item-index');
+    const blogTitleInput = document.getElementById('blog-title-input');
+    const blogCategoryInput = document.getElementById('blog-category-input');
+    const blogDateInput = document.getElementById('blog-date-input');
+    const blogImageInput = document.getElementById('blog-image-input');
+    const blogExcerptInput = document.getElementById('blog-excerpt-input');
+    const blogContentInput = document.getElementById('blog-content-input');
+    const blogTagsInput = document.getElementById('blog-tags-input');
+    const btnAddBlogPost = document.getElementById('btn-add-blog-post');
+    const btnSaveBlogItem = document.getElementById('btn-save-blog-item');
+    const btnCancelBlogItem = document.getElementById('btn-cancel-blog-item');
+
+    let blogItems = JSON.parse(localStorage.getItem('blogItems')) || [];
+
+    function saveBlogToStorage() {
+        localStorage.setItem('blogItems', JSON.stringify(blogItems));
+    }
+
+    function renderBlogItems() {
+        if (!blogList) return;
+        blogList.innerHTML = '';
+        if (blogItems.length === 0) {
+            blogList.innerHTML = '<p style="color:#999; padding: 15px;">No blog posts yet. Click "Add New Post" to create one.</p>';
+            return;
+        }
+        blogItems.forEach((item, index) => {
+            const html = `
+                <div class="list-item" style="padding: 15px 20px;">
+                    <div class="item-details" style="flex:1;">
+                        <h4 style="margin: 0;">${item.title || 'Untitled Post'}</h4>
+                        <p style="margin: 5px 0 0; font-size: 0.85rem; color: #666;">${item.category || ''} ${item.date ? '&middot; ' + item.date : ''}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn-edit btn-edit-blog" data-index="${index}"><i class="fas fa-edit"></i></button>
+                        <button class="btn-delete btn-delete-blog" data-index="${index}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+            blogList.insertAdjacentHTML('beforeend', html);
+        });
+
+        document.querySelectorAll('.btn-edit-blog').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const idx = parseInt(this.getAttribute('data-index'));
+                const item = blogItems[idx];
+                blogItemIndex.value = idx;
+                blogTitleInput.value = item.title || '';
+                blogCategoryInput.value = item.category || '';
+                blogDateInput.value = item.date || '';
+                blogImageInput.value = item.image || '';
+                blogExcerptInput.value = item.excerpt || '';
+                blogContentInput.value = item.content || '';
+                blogTagsInput.value = item.tags || '';
+                blogFormTitle.textContent = 'Edit Blog Post';
+                blogFormContainer.style.display = 'block';
+                blogFormContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        document.querySelectorAll('.btn-delete-blog').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const idx = parseInt(this.getAttribute('data-index'));
+                if (confirm('Delete this blog post?')) {
+                    blogItems.splice(idx, 1);
+                    saveBlogToStorage();
+                    renderBlogItems();
+                }
+            });
+        });
+    }
+
+    if (btnAddBlogPost) {
+        btnAddBlogPost.addEventListener('click', () => {
+            blogItemIndex.value = -1;
+            blogTitleInput.value = '';
+            blogCategoryInput.value = '';
+            blogDateInput.value = '';
+            blogImageInput.value = '';
+            blogExcerptInput.value = '';
+            blogContentInput.value = '';
+            blogTagsInput.value = '';
+            blogFormTitle.textContent = 'Add New Blog Post';
+            blogFormContainer.style.display = 'block';
+            blogFormContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    if (btnSaveBlogItem) {
+        btnSaveBlogItem.addEventListener('click', () => {
+            const titleVal = blogTitleInput.value.trim();
+            if (!titleVal) {
+                alert('Please provide a title.');
+                return;
+            }
+            const newItem = {
+                title: titleVal,
+                category: blogCategoryInput.value.trim(),
+                date: blogDateInput.value.trim(),
+                image: blogImageInput.value.trim(),
+                excerpt: blogExcerptInput.value.trim(),
+                content: blogContentInput.value.trim(),
+                tags: blogTagsInput.value.trim()
+            };
+            const idx = parseInt(blogItemIndex.value);
+            if (idx === -1) {
+                blogItems.unshift(newItem); // newest first
+            } else {
+                blogItems[idx] = newItem;
+            }
+            saveBlogToStorage();
+            blogFormContainer.style.display = 'none';
+            renderBlogItems();
+        });
+    }
+
+    if (btnCancelBlogItem) {
+        btnCancelBlogItem.addEventListener('click', () => {
+            blogFormContainer.style.display = 'none';
+        });
+    }
+
+    renderBlogItems();
+
+    // ===== LEARNING MANAGEMENT (Courses > Modules > MCQ Questions) =====
+    const learningList = document.getElementById('learning-list');
+    let learningCourses = JSON.parse(localStorage.getItem('learningCourses')) || [];
+    let learningView = 'courses'; // 'courses' | 'course-form' | 'modules' | 'module-form' | 'questions' | 'question-form'
+    let selCourseIdx = -1, editCourseIdx = -1;
+    let selModuleIdx = -1, editModuleIdx = -1;
+    let editQuestionIdx = -1;
+
+    function saveLearningToStorage() {
+        localStorage.setItem('learningCourses', JSON.stringify(learningCourses));
+    }
+
+    function esc(str) {
+        return (str || '').toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function renderLearning() {
+        if (!learningList) return;
+
+        // ----- COURSES LIST -----
+        if (learningView === 'courses') {
+            let html = `
+                <div class="tab-header">
+                    <h3>Manage Learning Courses</h3>
+                    <button type="button" id="btn-add-course" class="btn-save" style="width:auto;"><i class="fas fa-plus"></i> Add New Course</button>
+                </div>
+                <div class="list-container">
+            `;
+            if (learningCourses.length === 0) {
+                html += '<p style="color:#999; padding: 15px;">No courses yet. Click "Add New Course" to create one.</p>';
+            }
+            learningCourses.forEach((course, idx) => {
+                html += `
+                    <div class="list-item" style="padding: 15px 20px;">
+                        <div class="item-details" style="flex:1;">
+                            <h4 style="margin:0;"><i class="${esc(course.icon) || 'fas fa-book'}"></i> ${esc(course.title)}</h4>
+                            <p style="margin: 5px 0 0; font-size: 0.85rem; color: #666;">${esc(course.description)}</p>
+                            <p style="margin: 5px 0 0; font-size: 0.8rem; color: #999;">${(course.modules || []).length} module(s)</p>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-edit btn-manage-modules" data-index="${idx}" title="Manage Modules"><i class="fas fa-folder-open"></i></button>
+                            <button class="btn-edit btn-edit-course" data-index="${idx}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-delete btn-delete-course" data-index="${idx}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            learningList.innerHTML = html;
+
+            document.getElementById('btn-add-course').addEventListener('click', () => {
+                editCourseIdx = -1;
+                learningView = 'course-form';
+                renderLearning();
+            });
+            document.querySelectorAll('.btn-manage-modules').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    selCourseIdx = parseInt(this.getAttribute('data-index'));
+                    learningView = 'modules';
+                    renderLearning();
+                });
+            });
+            document.querySelectorAll('.btn-edit-course').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    editCourseIdx = parseInt(this.getAttribute('data-index'));
+                    learningView = 'course-form';
+                    renderLearning();
+                });
+            });
+            document.querySelectorAll('.btn-delete-course').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(this.getAttribute('data-index'));
+                    if (confirm('Delete this course and all its modules/questions?')) {
+                        learningCourses.splice(idx, 1);
+                        saveLearningToStorage();
+                        renderLearning();
+                    }
+                });
+            });
+            return;
+        }
+
+        // ----- COURSE ADD/EDIT FORM -----
+        if (learningView === 'course-form') {
+            const course = editCourseIdx > -1 ? learningCourses[editCourseIdx] : { title: '', description: '', icon: 'fas fa-book' };
+            learningList.innerHTML = `
+                <div class="tab-header"><h3>${editCourseIdx > -1 ? 'Edit Course' : 'Add New Course'}</h3></div>
+                <div style="background:#f8f9fa; padding:20px; border-radius:8px; border:1px solid #e9ecef;">
+                    <div class="form-group"><label>Course Title</label>
+                        <input type="text" id="course-title-input" value="${esc(course.title)}" placeholder="e.g. Embedded C Programming"></div>
+                    <div class="form-group"><label>Description</label>
+                        <textarea id="course-desc-input" rows="2" placeholder="Short description">${esc(course.description)}</textarea></div>
+                    <div class="form-group"><label>Icon (e.g. fas fa-book)</label>
+                        <input type="text" id="course-icon-input" value="${esc(course.icon)}" placeholder="fas fa-book"></div>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" id="btn-save-course" class="btn-save">Save Course</button>
+                        <button type="button" id="btn-cancel-course" class="btn-logout" style="width:auto; padding:12px 25px;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('btn-save-course').addEventListener('click', () => {
+                const titleVal = document.getElementById('course-title-input').value.trim();
+                if (!titleVal) { alert('Please provide a course title.'); return; }
+                const newCourse = {
+                    title: titleVal,
+                    description: document.getElementById('course-desc-input').value.trim(),
+                    icon: document.getElementById('course-icon-input').value.trim() || 'fas fa-book',
+                    modules: editCourseIdx > -1 ? (learningCourses[editCourseIdx].modules || []) : []
+                };
+                if (editCourseIdx > -1) { learningCourses[editCourseIdx] = newCourse; }
+                else { learningCourses.push(newCourse); }
+                saveLearningToStorage();
+                learningView = 'courses';
+                renderLearning();
+            });
+            document.getElementById('btn-cancel-course').addEventListener('click', () => {
+                learningView = 'courses';
+                renderLearning();
+            });
+            return;
+        }
+
+        const currentCourse = learningCourses[selCourseIdx];
+        if (!currentCourse) { learningView = 'courses'; renderLearning(); return; }
+
+        // ----- MODULES LIST -----
+        if (learningView === 'modules') {
+            let html = `
+                <div class="tab-header">
+                    <button type="button" id="btn-back-to-courses" class="btn-back" style="margin-right:10px;"><i class="fas fa-arrow-left"></i> Back</button>
+                    <h3 style="display:inline;">${esc(currentCourse.title)} - Modules</h3>
+                    <button type="button" id="btn-add-module" class="btn-save" style="width:auto; float:right;"><i class="fas fa-plus"></i> Add Module</button>
+                </div>
+                <div class="list-container" style="margin-top:15px;">
+            `;
+            const modules = currentCourse.modules || [];
+            if (modules.length === 0) {
+                html += '<p style="color:#999; padding: 15px;">No modules yet. Click "Add Module" to create one.</p>';
+            }
+            modules.forEach((mod, idx) => {
+                html += `
+                    <div class="list-item" style="padding: 15px 20px;">
+                        <div class="item-details" style="flex:1;">
+                            <h4 style="margin:0;">${esc(mod.title)}</h4>
+                            <p style="margin: 5px 0 0; font-size: 0.85rem; color: #666;">${(mod.questions || []).length} MCQ question(s)</p>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn-edit btn-manage-questions" data-index="${idx}" title="Manage Questions"><i class="fas fa-question-circle"></i></button>
+                            <button class="btn-edit btn-edit-module" data-index="${idx}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-delete btn-delete-module" data-index="${idx}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            learningList.innerHTML = html;
+
+            document.getElementById('btn-back-to-courses').addEventListener('click', () => {
+                learningView = 'courses'; renderLearning();
+            });
+            document.getElementById('btn-add-module').addEventListener('click', () => {
+                editModuleIdx = -1; learningView = 'module-form'; renderLearning();
+            });
+            document.querySelectorAll('.btn-manage-questions').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    selModuleIdx = parseInt(this.getAttribute('data-index'));
+                    learningView = 'questions'; renderLearning();
+                });
+            });
+            document.querySelectorAll('.btn-edit-module').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    editModuleIdx = parseInt(this.getAttribute('data-index'));
+                    learningView = 'module-form'; renderLearning();
+                });
+            });
+            document.querySelectorAll('.btn-delete-module').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(this.getAttribute('data-index'));
+                    if (confirm('Delete this module and its questions?')) {
+                        currentCourse.modules.splice(idx, 1);
+                        saveLearningToStorage();
+                        renderLearning();
+                    }
+                });
+            });
+            return;
+        }
+
+        // ----- MODULE ADD/EDIT FORM -----
+        if (learningView === 'module-form') {
+            const mod = editModuleIdx > -1 ? currentCourse.modules[editModuleIdx] : { title: '', notes: '' };
+            learningList.innerHTML = `
+                <div class="tab-header"><h3>${editModuleIdx > -1 ? 'Edit Module' : 'Add Module'} - ${esc(currentCourse.title)}</h3></div>
+                <div style="background:#f8f9fa; padding:20px; border-radius:8px; border:1px solid #e9ecef;">
+                    <div class="form-group"><label>Module Title</label>
+                        <input type="text" id="module-title-input" value="${esc(mod.title)}" placeholder="e.g. Module 1: Introduction"></div>
+                    <div class="form-group"><label>Notes / Course Content</label>
+                        <textarea id="module-notes-input" rows="8" placeholder="Write module notes/content here...">${esc(mod.notes)}</textarea></div>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" id="btn-save-module" class="btn-save">Save Module</button>
+                        <button type="button" id="btn-cancel-module" class="btn-logout" style="width:auto; padding:12px 25px;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('btn-save-module').addEventListener('click', () => {
+                const titleVal = document.getElementById('module-title-input').value.trim();
+                if (!titleVal) { alert('Please provide a module title.'); return; }
+                const newModule = {
+                    title: titleVal,
+                    notes: document.getElementById('module-notes-input').value.trim(),
+                    questions: editModuleIdx > -1 ? (currentCourse.modules[editModuleIdx].questions || []) : []
+                };
+                if (!currentCourse.modules) currentCourse.modules = [];
+                if (editModuleIdx > -1) { currentCourse.modules[editModuleIdx] = newModule; }
+                else { currentCourse.modules.push(newModule); }
+                saveLearningToStorage();
+                learningView = 'modules';
+                renderLearning();
+            });
+            document.getElementById('btn-cancel-module').addEventListener('click', () => {
+                learningView = 'modules'; renderLearning();
+            });
+            return;
+        }
+
+        const currentModule = (currentCourse.modules || [])[selModuleIdx];
+        if (!currentModule) { learningView = 'modules'; renderLearning(); return; }
+
+        // ----- QUESTIONS LIST -----
+        if (learningView === 'questions') {
+            let html = `
+                <div class="tab-header">
+                    <button type="button" id="btn-back-to-modules" class="btn-back" style="margin-right:10px;"><i class="fas fa-arrow-left"></i> Back</button>
+                    <h3 style="display:inline;">${esc(currentModule.title)} - MCQ Questions</h3>
+                    <button type="button" id="btn-add-question" class="btn-save" style="width:auto; float:right;"><i class="fas fa-plus"></i> Add Question</button>
+                </div>
+                <div class="list-container" style="margin-top:15px;">
+            `;
+            const questions = currentModule.questions || [];
+            if (questions.length === 0) {
+                html += '<p style="color:#999; padding: 15px;">No questions yet. Click "Add Question" to create one.</p>';
+            }
+            questions.forEach((q, idx) => {
+                html += `
+                    <div class="list-item" style="padding: 15px 20px; display:block;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <h4 style="margin:0; flex:1;">${idx + 1}. ${esc(q.question)}</h4>
+                            <div class="item-actions">
+                                <button class="btn-edit btn-edit-question" data-index="${idx}"><i class="fas fa-edit"></i></button>
+                                <button class="btn-delete btn-delete-question" data-index="${idx}"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <ul style="margin: 10px 0 0; padding-left: 20px; font-size:0.85rem; color:#555;">
+                            ${(q.options || []).map((opt, i) => `<li style="${i === q.correctIndex ? 'color:#2a9d8f; font-weight:600;' : ''}">${esc(opt)} ${i === q.correctIndex ? '✓' : ''}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            learningList.innerHTML = html;
+
+            document.getElementById('btn-back-to-modules').addEventListener('click', () => {
+                learningView = 'modules'; renderLearning();
+            });
+            document.getElementById('btn-add-question').addEventListener('click', () => {
+                editQuestionIdx = -1; learningView = 'question-form'; renderLearning();
+            });
+            document.querySelectorAll('.btn-edit-question').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    editQuestionIdx = parseInt(this.getAttribute('data-index'));
+                    learningView = 'question-form'; renderLearning();
+                });
+            });
+            document.querySelectorAll('.btn-delete-question').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const idx = parseInt(this.getAttribute('data-index'));
+                    if (confirm('Delete this question?')) {
+                        currentModule.questions.splice(idx, 1);
+                        saveLearningToStorage();
+                        renderLearning();
+                    }
+                });
+            });
+            return;
+        }
+
+        // ----- QUESTION ADD/EDIT FORM -----
+        if (learningView === 'question-form') {
+            const q = editQuestionIdx > -1 ? currentModule.questions[editQuestionIdx] : { question: '', options: ['', '', '', ''], correctIndex: 0, explanation: '' };
+            const opts = q.options && q.options.length === 4 ? q.options : ['', '', '', ''];
+            learningList.innerHTML = `
+                <div class="tab-header"><h3>${editQuestionIdx > -1 ? 'Edit Question' : 'Add Question'}</h3></div>
+                <div style="background:#f8f9fa; padding:20px; border-radius:8px; border:1px solid #e9ecef;">
+                    <div class="form-group"><label>Question</label>
+                        <textarea id="q-text-input" rows="2">${esc(q.question)}</textarea></div>
+                    ${[0, 1, 2, 3].map(i => `
+                        <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                            <input type="radio" name="q-correct" id="q-correct-${i}" value="${i}" ${q.correctIndex === i ? 'checked' : ''} style="width:auto;">
+                            <input type="text" id="q-opt-${i}" value="${esc(opts[i])}" placeholder="Option ${String.fromCharCode(65 + i)}" style="flex:1;">
+                        </div>
+                    `).join('')}
+                    <p style="font-size:0.8rem; color:#999; margin: -5px 0 15px 30px;">Select the radio button next to the correct answer.</p>
+                    <div class="form-group"><label>Explanation (optional, shown after answering)</label>
+                        <textarea id="q-explanation-input" rows="2">${esc(q.explanation)}</textarea></div>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" id="btn-save-question" class="btn-save">Save Question</button>
+                        <button type="button" id="btn-cancel-question" class="btn-logout" style="width:auto; padding:12px 25px;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('btn-save-question').addEventListener('click', () => {
+                const questionVal = document.getElementById('q-text-input').value.trim();
+                const optionVals = [0, 1, 2, 3].map(i => document.getElementById(`q-opt-${i}`).value.trim());
+                const correctChecked = document.querySelector('input[name="q-correct"]:checked');
+                if (!questionVal || optionVals.some(o => !o)) {
+                    alert('Please fill the question and all 4 options.');
+                    return;
+                }
+                const newQuestion = {
+                    question: questionVal,
+                    options: optionVals,
+                    correctIndex: correctChecked ? parseInt(correctChecked.value) : 0,
+                    explanation: document.getElementById('q-explanation-input').value.trim()
+                };
+                if (!currentModule.questions) currentModule.questions = [];
+                if (editQuestionIdx > -1) { currentModule.questions[editQuestionIdx] = newQuestion; }
+                else { currentModule.questions.push(newQuestion); }
+                saveLearningToStorage();
+                learningView = 'questions';
+                renderLearning();
+            });
+            document.getElementById('btn-cancel-question').addEventListener('click', () => {
+                learningView = 'questions'; renderLearning();
+            });
+            return;
+        }
+    }
+
+    renderLearning();
+
     // --- CONTACT SECTION SAVE ---
     const contactForm = document.getElementById('contact-form');
     const contactEmailInput = document.getElementById('contact-email');
@@ -2573,7 +3040,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'aboutParagraphs', 'aboutObjectives', 'aboutObjective',
         'educationItems', 'skillsItems', 'projectsItems',
         'experienceItems', 'certificatesItems',
-        'contactEmail', 'contactPhone', 'contactLocation'
+        'contactEmail', 'contactPhone', 'contactLocation',
+        'blogItems', 'learningCourses'
     ];
 
     function showBackupStatus(message, isError) {
