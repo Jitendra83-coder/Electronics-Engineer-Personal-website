@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
 
-Sitemap: https://www.jitendrasharma.com.np/sitemap.xml
+Sitemap: https://www.jitendra-sharma.com.np/sitemap.xml
