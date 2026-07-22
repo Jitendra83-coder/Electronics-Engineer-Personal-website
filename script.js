@@ -912,67 +912,112 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- RENDER BLOG FROM LOCALSTORAGE ---
+    // --- RENDER BLOG (from localStorage first, then refreshed from Firestore) ---
     const blogGrid = document.querySelector('.blog-grid');
-    if (blogGrid) {
+    const blogSinglePost = document.querySelector('.blog-single-post');
+
+    function renderPublicBlog(blogItems) {
+        if (!blogGrid) return;
         try {
-            const storedBlog = localStorage.getItem('blogItems');
-            if (storedBlog) {
-                const blogItems = JSON.parse(storedBlog);
-                if (blogItems.length > 0) {
-                    blogGrid.innerHTML = '';
-                    blogItems.forEach((post, idx) => {
-                        const tagsHTML = (post.tags || '')
-                            .split(',')
-                            .filter(t => t.trim())
-                            .map(tag => `<span class="skill-tag">${tag.trim()}</span>`)
-                            .join('');
+            if (blogItems && blogItems.length > 0) {
+                blogGrid.innerHTML = '';
+                blogItems.forEach((post, idx) => {
+                    const tagsHTML = (post.tags || '')
+                        .split(',')
+                        .filter(t => t.trim())
+                        .map(tag => `<span class="skill-tag">${tag.trim()}</span>`)
+                        .join('');
 
-                        const slug = (post.title || 'post').toLowerCase().trim()
-                            .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'post';
+                    const card = document.createElement('div');
+                    card.className = 'blog-card';
+                    card.style.cssText = 'background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.08); display:flex; flex-direction:column; cursor:pointer;';
+                    card.setAttribute('data-index', idx);
+                    card.innerHTML = `
+                        ${post.image ? `<img src="${post.image}" alt="${post.title}" style="width:100%; height:180px; object-fit:cover;">` : ''}
+                        <div style="padding:20px; flex:1; display:flex; flex-direction:column;">
+                            <div style="font-size:0.8rem; color:#888; margin-bottom:8px;">${post.category || ''} ${post.date ? '&middot; ' + post.date : ''}</div>
+                            <h3 style="margin:0 0 10px; font-size:1.15rem;">${post.title}</h3>
+                            <p style="color:#666; font-size:0.9rem; flex:1;">${post.excerpt || ''}</p>
+                            ${tagsHTML ? `<div class="skills-tags" style="margin:12px 0;">${tagsHTML}</div>` : ''}
+                            <button type="button" class="btn-read-more" data-index="${idx}" style="margin-top:10px; padding:10px 18px; border:none; border-radius:6px; background:var(--primary-color, #4361ee); color:#fff; cursor:pointer; align-self:flex-start;">Read More</button>
+                        </div>
+                    `;
+                    blogGrid.appendChild(card);
+                });
 
-                        const card = document.createElement('div');
-                        card.className = 'blog-card';
-                        card.innerHTML = `
-                            <div class="win-chrome">
-                                <span class="dot red"></span>
-                                <span class="dot yellow"></span>
-                                <span class="dot green"></span>
-                                <span class="win-path">~/blog/${slug}.md</span>
+                function openSinglePost(idx) {
+                    const post = blogItems[idx];
+                    if (!post || !blogSinglePost) return;
+                    const tagsHTML = (post.tags || '')
+                        .split(',')
+                        .filter(t => t.trim())
+                        .map(tag => `<span class="skill-tag">${tag.trim()}</span>`)
+                        .join('');
+
+                    blogSinglePost.innerHTML = `
+                        <button type="button" class="btn-back-to-blog-list" style="margin-bottom:20px; padding:8px 16px; border:1px solid #ddd; background:#fff; border-radius:6px; cursor:pointer;"><i class="fas fa-arrow-left"></i> Back to Blog List</button>
+                        <div style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+                            ${post.image ? `<img src="${post.image}" alt="${post.title}" style="width:100%; max-height:350px; object-fit:cover;">` : ''}
+                            <div style="padding:30px;">
+                                <div style="font-size:0.85rem; color:#888; margin-bottom:10px;">${post.category || ''} ${post.date ? '&middot; ' + post.date : ''}</div>
+                                <h2 style="margin:0 0 15px;">${post.title}</h2>
+                                ${tagsHTML ? `<div class="skills-tags" style="margin-bottom:20px;">${tagsHTML}</div>` : ''}
+                                <div style="white-space:pre-wrap; color:#444; line-height:1.7;">${post.content || post.excerpt || ''}</div>
                             </div>
-                            ${post.image ? `<img src="${post.image}" alt="${post.title}" class="blog-card-image">` : ''}
-                            <div class="blog-card-body">
-                                <div class="blog-card-meta">${post.category || 'article'}${post.date ? ' &middot; ' + post.date : ''}</div>
-                                <h3>${post.title}</h3>
-                                <p class="excerpt">${post.excerpt || ''}</p>
-                                ${tagsHTML ? `<div class="blog-card-tags">${tagsHTML}</div>` : ''}
-                                <button class="btn-read-more" data-index="${idx}">Read More</button>
-                                <div class="blog-full-content" style="display:none;"></div>
-                            </div>
-                        `;
-                        blogGrid.appendChild(card);
-                    });
+                        </div>
+                    `;
 
-                    blogGrid.querySelectorAll('.btn-read-more').forEach(btn => {
-                        btn.addEventListener('click', function () {
-                            const idx = parseInt(this.getAttribute('data-index'));
-                            const contentDiv = this.nextElementSibling;
-                            if (contentDiv.style.display === 'none') {
-                                contentDiv.textContent = blogItems[idx].content || '';
-                                contentDiv.style.display = 'block';
-                                this.textContent = 'Show Less';
-                            } else {
-                                contentDiv.style.display = 'none';
-                                this.textContent = 'Read More';
-                            }
-                        });
+                    blogGrid.style.display = 'none';
+                    blogSinglePost.style.display = 'block';
+                    blogSinglePost.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    blogSinglePost.querySelector('.btn-back-to-blog-list').addEventListener('click', () => {
+                        blogSinglePost.style.display = 'none';
+                        blogGrid.style.display = 'grid';
+                        blogGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     });
                 }
+
+                blogGrid.querySelectorAll('.blog-card').forEach(card => {
+                    card.addEventListener('click', function (e) {
+                        // Avoid double-trigger when the inner Read More button is clicked
+                        if (e.target.closest('.btn-read-more')) return;
+                        openSinglePost(parseInt(this.getAttribute('data-index')));
+                    });
+                });
+
+                blogGrid.querySelectorAll('.btn-read-more').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        openSinglePost(parseInt(this.getAttribute('data-index')));
+                    });
+                });
             }
         } catch (e) {
             console.error('Error rendering blog:', e);
         }
     }
+
+    // 1) Render instantly from local cache (works offline / while Firestore loads)
+    try {
+        const storedBlog = localStorage.getItem('blogItems');
+        if (storedBlog) renderPublicBlog(JSON.parse(storedBlog));
+    } catch (e) {
+        console.error('Error rendering cached blog:', e);
+    }
+
+    // 2) Fetch the latest shared copy from Firestore (so every visitor, on any
+    //    browser/device, sees posts added from the admin panel) and re-render.
+    if (window.db) {
+        window.db.collection('portfolioData').doc('blogItems').get().then(doc => {
+            if (doc.exists && Array.isArray(doc.data().items)) {
+                const freshBlogItems = doc.data().items;
+                localStorage.setItem('blogItems', JSON.stringify(freshBlogItems));
+                renderPublicBlog(freshBlogItems);
+            }
+        }).catch(err => console.error('Firestore blog fetch error:', err));
+    }
+
 
     // --- SEED DEFAULT C / C++ COURSES (only the first time, so it never
     //     overwrites courses you add or delete later from the admin panel) ---
@@ -1284,141 +1329,124 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('learningCourses', JSON.stringify(defaultLearningCourses));
     }
 
-    // --- RENDER LEARNING (COURSES/MODULES/MCQ) FROM LOCALSTORAGE ---
+    // --- RENDER LEARNING (COURSES/MODULES/MCQ), from localStorage first, then Firestore ---
     const learningContainer = document.querySelector('.learning-courses');
-    if (learningContainer) {
+
+    function renderPublicLearning(courses) {
+        if (!learningContainer) return;
         try {
-            const storedLearning = localStorage.getItem('learningCourses');
-            if (storedLearning) {
-                const courses = JSON.parse(storedLearning);
-                if (courses.length > 0) {
-                    learningContainer.innerHTML = '';
-                    courses.forEach((course, cIdx) => {
-                        const slug = (course.title || 'course').toLowerCase().trim()
-                            .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'course';
+            if (courses && courses.length > 0) {
+                learningContainer.innerHTML = '';
+                courses.forEach((course, cIdx) => {
+                    const courseCard = document.createElement('div');
+                    courseCard.style.cssText = 'background:#fff; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08); margin-bottom:20px; overflow:hidden;';
 
-                        const modulesHTML = (course.modules || []).map((mod, mIdx) => {
-                            const qCount = (mod.questions || []).length;
-                            const questionsHTML = (mod.questions || []).map((q, qIdx) => {
-                                const optsHTML = (q.options || []).map((opt, oIdx) => `
-                                    <label class="mcq-option">
-                                        <input type="radio" name="c${cIdx}-m${mIdx}-q${qIdx}" value="${oIdx}">
-                                        <span>${opt}</span>
-                                    </label>
-                                `).join('');
-                                return `
-                                    <div class="mcq-block" data-correct="${q.correctIndex}">
-                                        <p class="mcq-question"><span class="q-num">Q${qIdx + 1}</span> ${q.question}</p>
-                                        ${optsHTML}
-                                        <button class="btn-check-answer" type="button">Check answer</button>
-                                        <p class="mcq-result"></p>
-                                        ${q.explanation ? `<p class="mcq-explanation">${q.explanation}</p>` : ''}
-                                    </div>
-                                `;
-                            }).join('');
-
+                    const modulesHTML = (course.modules || []).map((mod, mIdx) => {
+                        const questionsHTML = (mod.questions || []).map((q, qIdx) => {
+                            const optsHTML = (q.options || []).map((opt, oIdx) => `
+                                <label style="display:block; padding:8px 12px; margin:5px 0; border:1px solid #e0e0e0; border-radius:6px; cursor:pointer;">
+                                    <input type="radio" name="c${cIdx}-m${mIdx}-q${qIdx}" value="${oIdx}" style="margin-right:8px;"> ${opt}
+                                </label>
+                            `).join('');
                             return `
-                                <div class="learning-module">
-                                    <div class="module-header">
-                                        <div class="module-header-left">
-                                            <span class="module-index">${String(mIdx + 1).padStart(2, '0')}</span>
-                                            <strong>${mod.title}</strong>
-                                        </div>
-                                        <div class="module-header-right">
-                                            <span class="module-score">${qCount} question${qCount === 1 ? '' : 's'}</span>
-                                            <i class="fas fa-chevron-down"></i>
-                                        </div>
-                                    </div>
-                                    <div class="module-body" style="display:none;">
-                                        ${mod.notes ? `<div class="module-notes">${mod.notes}</div>` : ''}
-                                        ${questionsHTML}
-                                    </div>
+                                <div class="mcq-block" style="margin:15px 0; padding:15px; background:#f8f9fa; border-radius:8px;" data-correct="${q.correctIndex}">
+                                    <p style="font-weight:600; margin-bottom:8px;">${qIdx + 1}. ${q.question}</p>
+                                    ${optsHTML}
+                                    <button class="btn-check-answer" style="margin-top:8px; padding:6px 14px; border:none; border-radius:6px; background:#4361ee; color:#fff; cursor:pointer; font-size:0.85rem;">Check Answer</button>
+                                    <p class="mcq-result" style="margin-top:8px; font-size:0.85rem; display:none;"></p>
+                                    ${q.explanation ? `<p class="mcq-explanation" style="margin-top:5px; font-size:0.8rem; color:#777; display:none;">${q.explanation}</p>` : ''}
                                 </div>
                             `;
                         }).join('');
 
-                        const courseCard = document.createElement('div');
-                        courseCard.className = 'course-card';
-                        courseCard.innerHTML = `
-                            <div class="win-chrome">
-                                <span class="dot red"></span>
-                                <span class="dot yellow"></span>
-                                <span class="dot green"></span>
-                                <span class="win-path">~/learning/${slug}</span>
-                            </div>
-                            <div class="course-header">
-                                <div class="course-icon"><i class="${course.icon || 'fas fa-book'}"></i></div>
-                                <div class="course-header-text">
-                                    <h3>${course.title}</h3>
-                                    <p>${course.description || ''}</p>
+                        return `
+                            <div class="learning-module" style="border-top:1px solid #eee;">
+                                <div class="module-header" style="padding:15px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                                    <strong>${mod.title}</strong>
+                                    <i class="fas fa-chevron-down"></i>
                                 </div>
-                                <i class="fas fa-chevron-down course-header-chevron"></i>
-                            </div>
-                            <div class="course-body" style="display:none;">
-                                ${modulesHTML || '<p class="blog-empty">No modules yet.</p>'}
+                                <div class="module-body" style="display:none; padding:0 20px 20px;">
+                                    ${mod.notes ? `<p style="white-space:pre-wrap; color:#555; margin-bottom:15px;">${mod.notes}</p>` : ''}
+                                    ${questionsHTML}
+                                </div>
                             </div>
                         `;
-                        learningContainer.appendChild(courseCard);
+                    }).join('');
+
+                    courseCard.innerHTML = `
+                        <div class="course-header" style="padding:20px; background:#f8f9fa; display:flex; align-items:center; gap:15px; cursor:pointer;">
+                            <i class="${course.icon || 'fas fa-book'}" style="font-size:1.4rem; color:#4361ee;"></i>
+                            <div>
+                                <h3 style="margin:0;">${course.title}</h3>
+                                <p style="margin:5px 0 0; color:#777; font-size:0.9rem;">${course.description || ''}</p>
+                            </div>
+                        </div>
+                        <div class="course-body" style="display:none;">
+                            ${modulesHTML || '<p style="padding:20px; color:#999;">No modules yet.</p>'}
+                        </div>
+                    `;
+                    learningContainer.appendChild(courseCard);
+                });
+
+                // Toggle course body
+                learningContainer.querySelectorAll('.course-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const body = header.nextElementSibling;
+                        body.style.display = body.style.display === 'none' ? 'block' : 'none';
                     });
-
-                    // Toggle course body open/closed
-                    learningContainer.querySelectorAll('.course-card').forEach(card => {
-                        const header = card.querySelector('.course-header');
-                        const body = card.querySelector('.course-body');
-                        header.addEventListener('click', () => {
-                            const isOpen = card.classList.toggle('open');
-                            body.style.display = isOpen ? 'block' : 'none';
-                        });
+                });
+                // Toggle module body
+                learningContainer.querySelectorAll('.module-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const body = header.nextElementSibling;
+                        body.style.display = body.style.display === 'none' ? 'block' : 'none';
                     });
-                    // Toggle module body open/closed
-                    learningContainer.querySelectorAll('.learning-module').forEach(mod => {
-                        const header = mod.querySelector('.module-header');
-                        const body = mod.querySelector('.module-body');
-                        header.addEventListener('click', () => {
-                            const isOpen = mod.classList.toggle('open');
-                            body.style.display = isOpen ? 'block' : 'none';
-                        });
+                });
+                // Check answer buttons
+                learningContainer.querySelectorAll('.btn-check-answer').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const block = this.closest('.mcq-block');
+                        const correctIdx = parseInt(block.getAttribute('data-correct'));
+                        const selected = block.querySelector('input[type="radio"]:checked');
+                        const resultP = block.querySelector('.mcq-result');
+                        const explanationP = block.querySelector('.mcq-explanation');
+
+                        if (!selected) {
+                            resultP.textContent = 'Please select an answer first.';
+                            resultP.style.color = '#e63946';
+                            resultP.style.display = 'block';
+                            return;
+                        }
+                        const isCorrect = parseInt(selected.value) === correctIdx;
+                        resultP.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect. Try again!';
+                        resultP.style.color = isCorrect ? '#2a9d8f' : '#e63946';
+                        resultP.style.display = 'block';
+                        if (explanationP) explanationP.style.display = 'block';
                     });
-                    // Check answer buttons
-                    learningContainer.querySelectorAll('.btn-check-answer').forEach(btn => {
-                        btn.addEventListener('click', function () {
-                            const block = this.closest('.mcq-block');
-                            if (block.classList.contains('answered')) return;
-
-                            const correctIdx = parseInt(block.getAttribute('data-correct'));
-                            const selected = block.querySelector('input[type="radio"]:checked');
-                            const resultP = block.querySelector('.mcq-result');
-                            const explanationP = block.querySelector('.mcq-explanation');
-
-                            if (!selected) {
-                                resultP.textContent = 'Please select an answer first.';
-                                resultP.className = 'mcq-result incorrect';
-                                resultP.style.display = 'flex';
-                                return;
-                            }
-
-                            const isCorrect = parseInt(selected.value) === correctIdx;
-                            block.classList.add('answered', isCorrect ? 'correct' : 'incorrect');
-
-                            block.querySelectorAll('.mcq-option').forEach((opt, oIdx) => {
-                                const input = opt.querySelector('input');
-                                input.disabled = true;
-                                if (oIdx === correctIdx) opt.classList.add('correct-option');
-                                else if (input.checked) opt.classList.add('wrong-option');
-                            });
-
-                            resultP.innerHTML = isCorrect
-                                ? '<i class="fas fa-circle-check"></i> Correct!'
-                                : '<i class="fas fa-circle-xmark"></i> Not quite — check the highlighted answer.';
-                            resultP.className = 'mcq-result ' + (isCorrect ? 'correct' : 'incorrect');
-                            resultP.style.display = 'flex';
-                            if (explanationP) explanationP.style.display = 'block';
-                        });
-                    });
-                }
+                });
             }
         } catch (e) {
             console.error('Error rendering learning courses:', e);
         }
+    }
+
+    // 1) Render instantly from local cache (works offline / while Firestore loads)
+    try {
+        const storedLearning = localStorage.getItem('learningCourses');
+        if (storedLearning) renderPublicLearning(JSON.parse(storedLearning));
+    } catch (e) {
+        console.error('Error rendering cached learning courses:', e);
+    }
+
+    // 2) Fetch the latest shared copy from Firestore and re-render, so every
+    //    visitor on any browser/device sees courses added from the admin panel.
+    if (window.db) {
+        window.db.collection('portfolioData').doc('learningCourses').get().then(doc => {
+            if (doc.exists && Array.isArray(doc.data().courses)) {
+                const freshCourses = doc.data().courses;
+                localStorage.setItem('learningCourses', JSON.stringify(freshCourses));
+                renderPublicLearning(freshCourses);
+            }
+        }).catch(err => console.error('Firestore learning fetch error:', err));
     }
 });
