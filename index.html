@@ -71,7 +71,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Font Awesome Icons -->
@@ -964,15 +964,15 @@
     <!-- Blog Section -->
     <section id="blog" class="blog page-section">
         <div class="container">
-            <button type="button" class="page-back-btn"><i class="fas fa-arrow-left"></i> Back to Home</button>
             <div class="section-header">
+                <span class="page-kicker">blog@jitendra:~$ tail -f posts.log<span class="cursor">_</span></span>
                 <h2>Latest <span class="highlight">Blog</span></h2>
                 <div class="underline"></div>
                 <p class="section-subtitle">Articles, tutorials and notes on embedded systems & engineering</p>
             </div>
-            <div class="blog-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:25px; margin-top:40px;">
+            <div class="blog-grid">
                 <!-- Blog posts loaded dynamically from admin panel -->
-                <p style="color:#888; grid-column: 1/-1; text-align:center;">No blog posts yet. Check back soon!</p>
+                <p class="blog-empty">No blog posts yet. Check back soon!</p>
             </div>
             <div class="blog-single-post" style="display:none; max-width:800px; margin:40px auto 0;"></div>
         </div>
@@ -981,15 +981,15 @@
     <!-- Learning Section -->
     <section id="learning" class="learning page-section">
         <div class="container">
-            <button type="button" class="page-back-btn"><i class="fas fa-arrow-left"></i> Back to Home</button>
             <div class="section-header">
+                <span class="page-kicker">learning@jitendra:~$ ./run_quiz.sh<span class="cursor">_</span></span>
                 <h2>My <span class="highlight">Learning</span> Hub</h2>
                 <div class="underline"></div>
                 <p class="section-subtitle">Courses, notes and practice questions</p>
             </div>
-            <div class="learning-courses" style="margin-top:40px;">
+            <div class="learning-courses">
                 <!-- Courses loaded dynamically from admin panel -->
-                <p style="color:#888; text-align:center;">No courses added yet. Check back soon!</p>
+                <p class="blog-empty">No courses added yet. Check back soon!</p>
             </div>
         </div>
     </section>
@@ -1159,7 +1159,18 @@
     <!-- Firebase (cloud sync so Blog/Learning data shows on all devices/browsers) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeQMG9EKm7JhhXGcf9iVQazXKgEKKUN1M",
+            authDomain: "jitendra-sharma-portfoli-945d6.firebaseapp.com",
+            projectId: "jitendra-sharma-portfoli-945d6",
+            storageBucket: "jitendra-sharma-portfoli-945d6.firebasestorage.app",
+            messagingSenderId: "856409412134",
+            appId: "1:856409412134:web:63904ec719db1fb18f8ce7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore();
+    </script>
     <script src="script.js"></script>
 </body>
 
