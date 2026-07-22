@@ -47,6 +47,12 @@ const pageModeSections = ['blog', 'learning'];
 
 function enterPageMode(sectionId) {
     document.body.classList.add('page-mode');
+    // Belt-and-suspenders: force the navbar solid directly via JS, so it
+    // stays visible even if a stale/cached copy of styles.css is loaded.
+    if (navbar) {
+        navbar.style.backgroundColor = '#ffffff';
+        navbar.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+    }
     document.querySelectorAll('section[id]').forEach(sec => {
         sec.classList.toggle('active-page', sec.id === sectionId);
     });
@@ -61,6 +67,10 @@ function enterPageMode(sectionId) {
 
 function exitPageMode(scrollToId) {
     document.body.classList.remove('page-mode');
+    if (navbar) {
+        navbar.style.backgroundColor = '';
+        navbar.style.boxShadow = '';
+    }
     document.querySelectorAll('section[id]').forEach(sec => sec.classList.remove('active-page'));
     const target = scrollToId ? document.getElementById(scrollToId) : null;
     if (target) {
@@ -968,7 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'post';
 
                     blogSinglePost.innerHTML = `
-                        <button type="button" class="btn-back-to-blog-list"><i class="fas fa-arrow-left"></i> Back to Blog List</button>
+                        <button type="button" class="btn-back-to-blog-list"><i class="fas fa-arrow-left"></i><span>Back to Blog List</span></button>
                         <div class="blog-card">
                             <div class="win-chrome">
                                 <span class="dot red"></span>
