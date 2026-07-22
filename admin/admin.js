@@ -2532,6 +2532,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveBlogToStorage() {
         localStorage.setItem('blogItems', JSON.stringify(blogItems));
+        if (window.db) {
+            window.db.collection('portfolioData').doc('blogItems').set({ items: blogItems })
+                .catch(err => console.error('Firestore blog sync error:', err));
+        }
     }
 
     function renderBlogItems() {
@@ -2639,6 +2643,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderBlogItems();
 
+    // Pull latest data from Firestore in case it was edited from another device/browser
+    if (window.db) {
+        window.db.collection('portfolioData').doc('blogItems').get().then(doc => {
+            if (doc.exists && Array.isArray(doc.data().items)) {
+                blogItems = doc.data().items;
+                localStorage.setItem('blogItems', JSON.stringify(blogItems));
+                renderBlogItems();
+            }
+        }).catch(err => console.error('Firestore blog fetch error:', err));
+    }
+
     // ===== LEARNING MANAGEMENT (Courses > Modules > MCQ Questions) =====
     const learningList = document.getElementById('learning-list');
     let learningCourses = JSON.parse(localStorage.getItem('learningCourses')) || [];
@@ -2649,6 +2664,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveLearningToStorage() {
         localStorage.setItem('learningCourses', JSON.stringify(learningCourses));
+        if (window.db) {
+            window.db.collection('portfolioData').doc('learningCourses').set({ courses: learningCourses })
+                .catch(err => console.error('Firestore learning sync error:', err));
+        }
     }
 
     function esc(str) {
@@ -2978,6 +2997,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     renderLearning();
+
+    // Pull latest data from Firestore in case it was edited from another device/browser
+    if (window.db) {
+        window.db.collection('portfolioData').doc('learningCourses').get().then(doc => {
+            if (doc.exists && Array.isArray(doc.data().courses)) {
+                learningCourses = doc.data().courses;
+                localStorage.setItem('learningCourses', JSON.stringify(learningCourses));
+                renderLearning();
+            }
+        }).catch(err => console.error('Firestore learning fetch error:', err));
+    }
 
     // --- CONTACT SECTION SAVE ---
     const contactForm = document.getElementById('contact-form');
