@@ -936,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${post.image ? `<img src="${post.image}" alt="${post.title}" style="width:100%; height:180px; object-fit:cover;">` : ''}
                         <div style="padding:20px; flex:1; display:flex; flex-direction:column;">
                             <div style="font-size:0.8rem; color:#888; margin-bottom:8px;">${post.category || ''} ${post.date ? '&middot; ' + post.date : ''}</div>
-                            <h3 style="margin:0 0 10px; font-size:1.15rem;">${post.title}</h3>
+                            <h3 style="margin:0 0 10px; font-size:1.15rem; color:#111827;">${post.title}</h3>
                             <p style="color:#666; font-size:0.9rem; flex:1;">${post.excerpt || ''}</p>
                             ${tagsHTML ? `<div class="skills-tags" style="margin:12px 0;">${tagsHTML}</div>` : ''}
                             <button type="button" class="btn-read-more" data-index="${idx}" style="margin-top:10px; padding:10px 18px; border:none; border-radius:6px; background:var(--primary-color, #4361ee); color:#fff; cursor:pointer; align-self:flex-start;">Read More</button>
@@ -960,7 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${post.image ? `<img src="${post.image}" alt="${post.title}" style="width:100%; max-height:350px; object-fit:cover;">` : ''}
                             <div style="padding:30px;">
                                 <div style="font-size:0.85rem; color:#888; margin-bottom:10px;">${post.category || ''} ${post.date ? '&middot; ' + post.date : ''}</div>
-                                <h2 style="margin:0 0 15px;">${post.title}</h2>
+                                <h2 style="margin:0 0 15px; color:#111827;">${post.title}</h2>
                                 ${tagsHTML ? `<div class="skills-tags" style="margin-bottom:20px;">${tagsHTML}</div>` : ''}
                                 <div style="white-space:pre-wrap; color:#444; line-height:1.7;">${post.content || post.excerpt || ''}</div>
                             </div>
@@ -1344,29 +1344,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     const modulesHTML = (course.modules || []).map((mod, mIdx) => {
                         const questionsHTML = (mod.questions || []).map((q, qIdx) => {
                             const optsHTML = (q.options || []).map((opt, oIdx) => `
-                                <label style="display:block; padding:8px 12px; margin:5px 0; border:1px solid #e0e0e0; border-radius:6px; cursor:pointer;">
+                                <label style="display:block; padding:8px 12px; margin:5px 0; border:1px solid #e0e0e0; border-radius:6px; cursor:pointer; color:#333;">
                                     <input type="radio" name="c${cIdx}-m${mIdx}-q${qIdx}" value="${oIdx}" style="margin-right:8px;"> ${opt}
                                 </label>
                             `).join('');
                             return `
                                 <div class="mcq-block" style="margin:15px 0; padding:15px; background:#f8f9fa; border-radius:8px;" data-correct="${q.correctIndex}">
-                                    <p style="font-weight:600; margin-bottom:8px;">${qIdx + 1}. ${q.question}</p>
+                                    <p style="font-weight:600; margin-bottom:8px; color:#111827;">${qIdx + 1}. ${q.question}</p>
                                     ${optsHTML}
                                     <button class="btn-check-answer" style="margin-top:8px; padding:6px 14px; border:none; border-radius:6px; background:#4361ee; color:#fff; cursor:pointer; font-size:0.85rem;">Check Answer</button>
                                     <p class="mcq-result" style="margin-top:8px; font-size:0.85rem; display:none;"></p>
-                                    ${q.explanation ? `<p class="mcq-explanation" style="margin-top:5px; font-size:0.8rem; color:#777; display:none;">${q.explanation}</p>` : ''}
+                                    ${q.explanation ? `<p class="mcq-explanation" style="margin-top:5px; font-size:0.8rem; color:#666; display:none;">${q.explanation}</p>` : ''}
                                 </div>
                             `;
                         }).join('');
 
                         return `
                             <div class="learning-module" style="border-top:1px solid #eee;">
-                                <div class="module-header" style="padding:15px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
-                                    <strong>${mod.title}</strong>
-                                    <i class="fas fa-chevron-down"></i>
+                                <div class="module-header" style="padding:15px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; color:#111827;">
+                                    <strong style="color:#111827;">${mod.title}</strong>
+                                    <i class="fas fa-chevron-down" style="color:#111827;"></i>
                                 </div>
                                 <div class="module-body" style="display:none; padding:0 20px 20px;">
-                                    ${mod.notes ? `<p style="white-space:pre-wrap; color:#555; margin-bottom:15px;">${mod.notes}</p>` : ''}
+                                    ${mod.notes ? `<p style="white-space:pre-wrap; color:#444; margin-bottom:15px;">${mod.notes}</p>` : ''}
                                     ${questionsHTML}
                                 </div>
                             </div>
@@ -1377,8 +1377,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="course-header" style="padding:20px; background:#f8f9fa; display:flex; align-items:center; gap:15px; cursor:pointer;">
                             <i class="${course.icon || 'fas fa-book'}" style="font-size:1.4rem; color:#4361ee;"></i>
                             <div>
-                                <h3 style="margin:0;">${course.title}</h3>
-                                <p style="margin:5px 0 0; color:#777; font-size:0.9rem;">${course.description || ''}</p>
+                                <h3 style="margin:0; color:#111827;">${course.title}</h3>
+                                <p style="margin:5px 0 0; color:#555; font-size:0.9rem;">${course.description || ''}</p>
                             </div>
                         </div>
                         <div class="course-body" style="display:none;">
