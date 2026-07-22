@@ -369,10 +369,16 @@ ul {
 
 /* Force a solid, always-visible navbar while Blog/Learning are open —
    otherwise the navbar sits transparent (its normal un-scrolled state)
-   right over the dark page background, making dark nav-link text unreadable. */
+   right over the dark page background, making dark nav-link text unreadable.
+   !important is used here deliberately: this must win regardless of the
+   .scrolled state or any other navbar rule. */
 body.page-mode #navbar {
-    background-color: var(--bg-white);
-    box-shadow: var(--shadow-md);
+    background-color: var(--bg-white) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+body.page-mode .nav-link {
+    color: var(--text-dark) !important;
 }
 
 /* "Back to Blog List" button on the single-post view — same look as the
