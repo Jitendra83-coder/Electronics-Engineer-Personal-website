@@ -367,6 +367,39 @@ ul {
     }
 }
 
+/* Force a solid, always-visible navbar while Blog/Learning are open —
+   otherwise the navbar sits transparent (its normal un-scrolled state)
+   right over the dark page background, making dark nav-link text unreadable. */
+body.page-mode #navbar {
+    background-color: var(--bg-white);
+    box-shadow: var(--shadow-md);
+}
+
+/* "Back to Blog List" button on the single-post view — same look as the
+   page-level back button, styled for the dark surface. */
+.btn-back-to-blog-list {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--dev-surface);
+    border: 2px solid var(--dev-border);
+    color: var(--dev-text-muted);
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: 2rem;
+}
+
+.btn-back-to-blog-list:hover {
+    border-color: var(--dev-accent-2);
+    color: var(--dev-bg);
+    background: var(--dev-accent-2);
+}
+
 /* ===================================
    Section Styles
    =================================== */
