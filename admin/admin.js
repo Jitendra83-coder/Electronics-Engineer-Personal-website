@@ -2528,13 +2528,139 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSaveBlogItem = document.getElementById('btn-save-blog-item');
     const btnCancelBlogItem = document.getElementById('btn-cancel-blog-item');
 
+    // ----- Rich text editor toolbar (Full Content field) -----
+    const blogContentToolbar = document.getElementById('blog-content-toolbar');
+    const blogImageFileInput = document.getElementById('blog-image-file-input');
+    const btnInsertBlogImage = document.getElementById('btn-insert-blog-image');
+    let savedBlogEditorRange = null;
+
+    function saveBlogEditorSelection() {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && blogContentInput.contains(sel.anchorNode)) {
+            savedBlogEditorRange = sel.getRangeAt(0);
+        }
+    }
+
+    function restoreBlogEditorSelection() {
+        blogContentInput.focus();
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        if (savedBlogEditorRange) {
+            sel.addRange(savedBlogEditorRange);
+        } else {
+            // No prior selection: put cursor at the end of the content
+            const range = document.createRange();
+            range.selectNodeContents(blogContentInput);
+            range.collapse(false);
+            sel.addRange(range);
+        }
+    }
+
+    if (blogContentInput) {
+        blogContentInput.addEventListener('keyup', saveBlogEditorSelection);
+        blogContentInput.addEventListener('mouseup', saveBlogEditorSelection);
+        blogContentInput.addEventListener('blur', saveBlogEditorSelection);
+    }
+
+    if (blogContentToolbar) {
+        blogContentToolbar.querySelectorAll('button[data-cmd]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                restoreBlogEditorSelection();
+                const cmd = btn.getAttribute('data-cmd');
+                if (cmd === 'createLink') {
+                    const url = prompt('Link URL (https://...)');
+                    if (!url) return;
+                    document.execCommand('createLink', false, url);
+                } else if (cmd === 'formatBlock') {
+                    document.execCommand('formatBlock', false, btn.getAttribute('data-value'));
+                } else {
+                    document.execCommand(cmd, false, null);
+                }
+                saveBlogEditorSelection();
+            });
+        });
+    }
+
+    // Insert image: user picks a file, we downscale/compress it in-browser
+    // and embed it directly as a base64 <img> inside the post content.
+    // (No separate storage/server needed — it travels with the post itself.)
+    if (btnInsertBlogImage && blogImageFileInput) {
+        btnInsertBlogImage.addEventListener('click', () => {
+            saveBlogEditorSelection();
+            blogImageFileInput.click();
+        });
+
+        blogImageFileInput.addEventListener('change', () => {
+            const file = blogImageFileInput.files && blogImageFileInput.files[0];
+            blogImageFileInput.value = '';
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                alert('Please choose an image file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const maxWidth = 900;
+                    let { width, height } = img;
+                    if (width > maxWidth) {
+                        height = Math.round(height * (maxWidth / width));
+                        width = maxWidth;
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    // JPEG at 0.75 quality keeps file size (and Firestore doc size) small
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+
+                    restoreBlogEditorSelection();
+                    document.execCommand('insertImage', false, dataUrl);
+                    saveBlogEditorSelection();
+                };
+                img.onerror = () => alert('Could not read that image, please try another file.');
+                img.src = e.target.result;
+            };
+            reader.onerror = () => alert('Could not read that image, please try another file.');
+            reader.readAsDataURL(file);
+        });
+    }
+
     let blogItems = JSON.parse(localStorage.getItem('blogItems')) || [];
+
+    // Small toast so the admin actually notices if cloud sync fails,
+    // instead of silently thinking everything is saved everywhere.
+    function showCloudSyncStatus(ok, label) {
+        let toast = document.getElementById('cloud-sync-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'cloud-sync-toast';
+            toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;padding:12px 18px;border-radius:8px;font-size:0.9rem;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:opacity .3s;color:#fff;max-width:320px;';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = ok
+            ? `✅ ${label} synced to all devices.`
+            : `⚠️ ${label} saved on this browser only — cloud sync failed. Check Firestore setup/rules.`;
+        toast.style.background = ok ? '#28a745' : '#dc3545';
+        toast.style.opacity = '1';
+        clearTimeout(showCloudSyncStatus._t);
+        showCloudSyncStatus._t = setTimeout(() => { toast.style.opacity = '0'; }, ok ? 2500 : 6000);
+    }
 
     function saveBlogToStorage() {
         localStorage.setItem('blogItems', JSON.stringify(blogItems));
         if (window.db) {
             window.db.collection('portfolioData').doc('blogItems').set({ items: blogItems })
-                .catch(err => console.error('Firestore blog sync error:', err));
+                .then(() => showCloudSyncStatus(true, 'Blog post'))
+                .catch(err => {
+                    console.error('Firestore blog sync error:', err);
+                    showCloudSyncStatus(false, 'Blog post');
+                });
+        } else {
+            showCloudSyncStatus(false, 'Blog post');
         }
     }
 
@@ -2571,7 +2697,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 blogDateInput.value = item.date || '';
                 blogImageInput.value = item.image || '';
                 blogExcerptInput.value = item.excerpt || '';
-                blogContentInput.value = item.content || '';
+                blogContentInput.innerHTML = item.content || '';
                 blogTagsInput.value = item.tags || '';
                 blogFormTitle.textContent = 'Edit Blog Post';
                 blogFormContainer.style.display = 'block';
@@ -2599,7 +2725,7 @@ document.addEventListener('DOMContentLoaded', () => {
             blogDateInput.value = '';
             blogImageInput.value = '';
             blogExcerptInput.value = '';
-            blogContentInput.value = '';
+            blogContentInput.innerHTML = '';
             blogTagsInput.value = '';
             blogFormTitle.textContent = 'Add New Blog Post';
             blogFormContainer.style.display = 'block';
@@ -2620,7 +2746,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 date: blogDateInput.value.trim(),
                 image: blogImageInput.value.trim(),
                 excerpt: blogExcerptInput.value.trim(),
-                content: blogContentInput.value.trim(),
+                content: blogContentInput.innerHTML.trim(),
                 tags: blogTagsInput.value.trim()
             };
             const idx = parseInt(blogItemIndex.value);
@@ -2666,7 +2792,13 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('learningCourses', JSON.stringify(learningCourses));
         if (window.db) {
             window.db.collection('portfolioData').doc('learningCourses').set({ courses: learningCourses })
-                .catch(err => console.error('Firestore learning sync error:', err));
+                .then(() => showCloudSyncStatus(true, 'Learning course'))
+                .catch(err => {
+                    console.error('Firestore learning sync error:', err);
+                    showCloudSyncStatus(false, 'Learning course');
+                });
+        } else {
+            showCloudSyncStatus(false, 'Learning course');
         }
     }
 
